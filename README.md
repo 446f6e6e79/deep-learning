@@ -1,6 +1,5 @@
-# _CourseName
-
-A detailed collection of LaTeX-based lecture notes for the _CourseName course at the University of Trento, academic year 2025/2026, instructed by Prof. _professorName.
+# Deep Learning Notes
+A detailed collection of LaTeX-based lecture notes for the Deep Learning course at the University of Trento, academic year 2025/2026, instructed by Prof. Elisa Ricci.
 
 <div align="center">
     <a href="notes.pdf">
