@@ -1,0 +1,42 @@
+\begin{tikzpicture}[
+  node distance=0.8cm,
+  input/.style={circle, draw=blue!80!black, fill=blue!10, minimum size=20pt, font=\small},
+  neuron/.style={circle, draw=blue!80!black, fill=blue!20, minimum size=25pt, font=\small\bfseries},
+  output/.style={circle, draw=blue!80!black, fill=blue!30, minimum size=30pt, font=\small\bfseries},
+  bias/.style={circle, draw=red!80!black, fill=red!10, minimum size=20pt, font=\small},
+  weight/.style={font=\normalsize, color=blue!70!black}
+]
+
+  % Input layer nodes
+  \node[input] (x1) {$x_1$};
+  \node[input, below=of x1] (x2) {$x_2$};
+  \node[below=0.2cm of x2] (dots) {$\vdots$};
+  \node[input, below=0.2 cm of dots] (xn) {$x_n$};
+
+  % Summation node
+  \node[neuron, right=1.5cm of x2] (sum) {$\Sigma$};
+
+  % Bias node (above summation)
+  \node[bias, above=1cm of sum] (bias) {$1$};
+
+  % Activation function node
+  \node[neuron, right=1cm of sum] (activation) {$\sigma$};
+
+  % Output node
+  \node[output, right=1cm of activation] (output) {$\hat{y}$};
+
+  % Edges from inputs to summation with weight labels
+  \draw[->, thick] (x1) -- (sum) node[midway, above, weight] {$\theta_1$};
+  \draw[->, thick] (x2) -- (sum) node[midway, above, weight] {$\theta_2$};
+  \draw[->, thick] (xn) -- (sum) node[midway, below, weight] {$\theta_n$};
+
+  % Edge from bias to summation
+  \draw[->, thick, red!70!black] (bias) -- (sum) node[midway, right, font=\normalsize, color=red!70!black] {$\theta_0$};
+
+  % Edge from summation to activation
+  \draw[->, thick] (sum) -- (activation);
+
+  % Edge from activation to output
+  \draw[->, thick] (activation) -- (output);
+
+\end{tikzpicture}
