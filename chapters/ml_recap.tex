@@ -105,6 +105,33 @@ and we want to learn the underlying structure of the data. Some examples of unsu
     \end{itemize}
     The two components are trained together to minimize the reconstruction error, which is the difference between the original input and the reconstructed output.
     Once trained, the encoder can be used alone to obtain lower-dimensional representations of the data.
-
-    \subsubsection{Reinforcement}
 \end{itemize}
+
+\subsubsection{Reinforcement Learning}
+In Reinforcement Learning, an \textbf{agent} learn to interact with an \textbf{environment} in order to maximize a cumulative reward.
+We are not given any data, but rather the agent learns from its own experience, by exploring the environment and receiving feedback in the form of rewards.
+
+In \textbf{deep reinforcement learning} the agent uses a deep neural network to learn a policy that maps states of the environment to actions. 
+This allows the agent to learn complex behaviors and solve tasks that are difficult to solve with traditional reinforcement learning algorithms.
+
+\subsection{Designing a Learning System}
+To design a learning system, it's important to consider the following steps:
+\begin{enumerate}
+    \item \textbf{Choose the training experience $E$}: This is the data that will be used to train the model.
+    It should be representative of the problem we want to solve, and it should be of good quality;
+    \item \textbf{Choose the model}: This is the function that we want to learn from the data.
+    It heavily depends on the task we want to solve,
+    \item \textbf{Choose how to represent the model}: the form of the model, what kind of function we allow. For example, we can have:
+    \begin{itemize}
+        \item \textbf{Instance-based functions}: predictions are made based on the similarity between the input and the training examples. For example, k-nearest neighbors;
+        \item \textbf{Numerical functions}: predictions are made based on a mathematical function that maps inputs to outputs. For example, Neural Networks, SVMs;
+        \item \textbf{Probabilistic functions}: predictions are made based on a probability distribution over the possible outputs. For example, Naive Bayes;
+        \item \textbf{Symbolic functions}: predictions are made based on a set of rules that are learned from the data. For example, decision trees.
+    \end{itemize}
+    \item \textbf{Choose the learning algorithm}: This is the algorithm that will be used to learn the model from the data.
+    For example, for SVMs we can decide between different optimization algorithms, such as stochastic gradient descent or
+    quadratic optimization.
+    \item \textbf{Choose the performance measure $P$}: This is the metric that will be used to evaluate the performance of the model.
+\end{enumerate}
+
+\subsection{Optimization}
