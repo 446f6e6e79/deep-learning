@@ -1,28 +1,28 @@
 \section{Introduction}
-In this section we will briefly introduce the basic concepts of deep learning, 
-its historical background, and a brief recap of machine learning concepts that are fundamental to understanding deep learning.
+In this section, we will briefly introduce the basic concepts of deep learning and its historical background.
 
 \subsection{Basic Definitions}
 \paragraph{AI}
 Artificial Intelligence (AI) is a discipline that has the ambition to create machines that
 mimic human intelligence. It encompasses a wide range of techniques and approaches, including rule-based systems, expert systems, and machine learning.
-The ultimate goal of AI is to make programs that can learn from their experience as effectively as humans do.
+The ultimate goal of AI is to develop systems capable of learning from experience as effectively as humans do.
 
 \paragraph{Machine Learning}
-Machine Learning (ML) is a subset of AI that uses techniques that enable machines to learn
-from experience (i.e. data) to improve their performance on a specific task.
+Machine Learning (ML) is a subset of AI that enables machines to learn
+from experience (i.e., data) to improve their performance on a specific task.
 
-\paragraph{Deep Learning} is an area of Machine Learning that in particular focuses on
-\texttt{Artificial Neural Networks} (ANNs). The term "deep" refers to the use of multiple layers
+\paragraph{Deep Learning}
+This is a subfield of Machine Learning that particularly focuses on
+\textbf{Artificial Neural Networks} (ANNs). The term `deep' refers to the use of multiple layers
 in the network, which allows it to learn complex representations of data, with multiple levels of abstraction.
 
 \subsection{Historical Background}
 The concept of artificial neural networks dates back to the 1940s, with the work of Warren McCulloch and Walter Pitts, who proposed a simple model that
-tried to emulate the behavior of biological neurons.
-This can be seen as the first implementation of a single layer perceptron, which is a fundamental building block of deep learning.
+attempted to emulate the behavior of biological neurons.
+This is regarded as the first single-layer perceptron model, which is a fundamental building block of deep learning.
 
 \paragraph{Electronic Brain}
-In the first perceptron model, the input is a vector of \textbf{binary features} and all the inputs are simply summed together and passed through a \textbf{treshold function},
+In the first perceptron model, the inputs form a vector of \textbf{binary features} that are simply summed together and passed through a \textbf{threshold function},
 without any \textbf{weights} involved.
 \begin{figure}[H]
     \centering
@@ -32,11 +32,11 @@ without any \textbf{weights} involved.
     \caption{Architecture of the electronic brain model. Inputs $x_i$ are summed together and passed through an activation function $\sigma$ to produce the output $\hat{y}$.}
     \label{fig:electronic_brain}
 \end{figure}
-It can be shown that this model is capable of classifying linearly separable data, such as the AND, OR and NOT functions, but it fails to classify non-linearly separable data, such as the XOR function.
+It can be shown that this model is capable of classifying linearly separable data, such as the AND, OR, and NOT functions, but it fails to classify non-linearly separable data, such as the XOR function.
 
 \paragraph{The Perceptron}
-In the 1950s, Frank Rosenblatt introduced the concept of the \textbf{Perceptron}, which is an extension of the electronic brain model.
-The difference is found within the introduction of \textbf{weights} for each input, which allows the model to learn from data and adjust its parameters accordingly.
+In the 1950s, Frank Rosenblatt introduced the \textbf{Perceptron}, which is an extension of the electronic brain model.
+The key difference is the introduction of \textbf{weights} for each input, which allows the model to learn from data and adjust its parameters accordingly.
 \begin{figure}[H]
     \centering
     \scalebox{0.8}{
@@ -47,17 +47,17 @@ The difference is found within the introduction of \textbf{weights} for each inp
 \end{figure}
 The prediction $\hat{y}$ of the perceptron is given by the following formula:
 \begin{equation}
-    \hat{y} = \sigma\left(\sum_{i=1}^{n} \theta_i x_i\right)
+    \hat{y} = \sigma\left(\sum_{i=1}^{n} \theta_i x_i + \theta_0\right)
 \end{equation}
 where $\theta_i$ are the weights associated with each input $x_i$, and $\sigma$ is the activation function.
 We can also express the prediction in vector form as follows:
 \begin{equation}
-    \hat{y} = \sigma\left(\boldsymbol{\theta}^T \boldsymbol{x}\right)
+    \hat{y} = \sigma\left(\boldsymbol{\theta}^T \boldsymbol{x} + \theta_0\right)
 \end{equation}
 
 The most important intuition is that the weights $\theta_i$ are not fixed, but rather learned from data. 
 
-The notion of bias is also introduced, which allows the model to shift the decision boundary (hyperplane) away from the origin.
+The bias term is introduced to allow the model to shift the decision boundary (hyperplane) away from the origin.
 
 \paragraph{Perceptron Learning Algorithm}
 The weights of the perceptron are learned from data using the \textbf{Perceptron Training Rule}.
@@ -69,20 +69,20 @@ and a learning rate $\eta$, the weights are updated as follows:
     \begin{enumerate}
         \item Select randomly a training example $(\boldsymbol{x_i}, y_i)$ from $\mathcal{T}$;
         \item Compute the prediction $\hat{y}_i$ using the current weights:
-        \[ \hat{y}_i = \sigma\left(\theta ^ T \boldsymbol{x_i} + \theta_0 \right) \]
+        \[ \hat{y}_i = \sigma\left(\boldsymbol{\theta}^T \boldsymbol{x_i} + \theta_0 \right) \]
         \item Update the weights based on the error between the prediction and the true label:
-        \[ \theta^{(t+1)} \leftarrow \theta^{(t)} + \eta (y_i - \hat{y}_i) \boldsymbol{x_i} \]
+        \[ \boldsymbol{\theta}^{(t+1)} \leftarrow \boldsymbol{\theta}^{(t)} + \eta (y_i - \hat{y}_i) \boldsymbol{x_i} \]
         \item Update the bias:
         \[ \theta_0^{(t+1)} \leftarrow \theta_0^{(t)} + \eta (y_i - \hat{y}_i) \]
     \end{enumerate}
 \end{enumerate}
 Note that we are assuming that the training data is linearly separable, otherwise we would have to introduce a stopping criterion to prevent the algorithm from running indefinitely.
 
-\paragraph{Percepton Today}
+\paragraph{Perceptron Today}
 Today, the activation function $\sigma$ is typically a non-linear function, such as the sigmoid, ReLU, or tanh function, 
 which allows the model to learn complex patterns in the data.
 \definition{Perceptron}{
-    An artificial neuron, i.e. a \textbf{percepton} is a non-linear parametrized function
+    An artificial neuron, i.e., a perceptron is a non-linear parametrized function
     with a restricted output range.
 }
 
@@ -138,7 +138,7 @@ Three main factors contributed to the second AI winter in the late 1980s:
     \item \textbf{Lack of computational resources} to train deep neural networks. In fact, no GPUs were available at the time;
     \item \textbf{Lack of large datasets} to train deep neural networks.
 \end{itemize}
-All this issues led to a decline in interest and funding for research in this area, with an increase
+All these issues led to a decline in interest and funding for research in this area, with an increase
 of interest in other areas of ML, such as Support Vector Machines (SVMs) and Kernel Methods.
 
 \paragraph{First Deep Learning Applications - AlexNet}
