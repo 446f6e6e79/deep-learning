@@ -89,11 +89,20 @@ and we want to learn the underlying structure of the data. Some examples of unsu
     It is based on the idea of using a deep neural network to learn a low-dimensional representation of the data. This
     is then used as input to a clustering algorithm, producing a set of \textbf{pseudo-labels} that are used to train the neural network
     using backpropagation. This process is repeated iteratively until convergence;
-
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{media/ml_recap/deep_clustering.png}
+        \caption{Deep clustering.}
+    \end{figure}
     \item \textbf{Generative Models}: models learn the underlying distribution of the data,
     and can be used to generate new data points, similar to the ones in the training set.
     Also in this case, we can have \textbf{deep generative models}. They try to map exaples extracted from a simple distribution $Z$ to a more complex distribution $g_{\theta}(Z)$,
     which is similar to the distribution of $X$.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{media/ml_recap/deep_generative_models.png}
+        \caption{Deep generative models.}
+    \end{figure}
 
     \item \textbf{Dimensionality reduction}: try to map data to a lower-dimensional space in which
     visualization and interpretation are easier. This is often used as a preprocessing step for other machine learning algorithms.
@@ -131,7 +140,46 @@ To design a learning system, it's important to consider the following steps:
     \item \textbf{Choose the learning algorithm}: This is the algorithm that will be used to learn the model from the data.
     For example, for SVMs we can decide between different optimization algorithms, such as stochastic gradient descent or
     quadratic optimization.
+
+    The success of the machine learning system also depends on the search and optimization algorithm used to find the best model.
     \item \textbf{Choose the performance measure $P$}: This is the metric that will be used to evaluate the performance of the model.
+    Different tasks require different performance measures and it's not always a trivial choice. Ideally we would like to choose a performance measure that is closely related
+    to the loss function used to train the model.
 \end{enumerate}
 
-\subsection{Optimization}
+\subsection{Assumptions in Machine Learning}
+When developing a machine learning model, we usually assume that we are given a training set of examples that are \textbf{observed}
+and we want to learn a model that can make predictions on new, unseen examples, the \textbf{test set}.
+
+The challenge is that the algorithm has to learn a model that performs well on new examples. This ability is known as \textbf{generalization}.
+
+\subsubsection{Empirical risk minimization}
+Classical optimization algorithms are different from machine learning algorithms. 
+In classical optimization, the only goal is to find the best solution to a problem, reducing the \textbf{training error} as much as possible.
+In machine learning instead, we want to minimize the \textbf{test error}, which is the error on new, unseen examples. 
+This is a much harder problem, as we don't have direct access to the test set during training.
+
+To tackle this problem, we assume that both training and test examples are drawn from the same
+distribution. This is known as the \textbf{independent and identically distributed} (i.i.d.) assumption, and it allows us to use the 
+training set to learn a model that generalizes well to the test set.
+
+If the training set is representative of the underlying unknown distribution, then the \textbf{empirical loss} (the average loss on the training set)
+is a good estimate of the \textbf{expected loss} (the average loss on the test set). 
+This is the principle of \textbf{empirical risk minimization}.
+
+\subsubsection{Assumption violations}
+If the training set is not representative of the underlying distribution or if the i.i.d. assumption is violated,
+then the model may not generalize well to the test set, and we may end up with a model that performs well on the training set but poorly on the test set. This is known as \textbf{overfitting}.
+
+\subsubsection{Underfitting}
+If the model is too simple, it may perform poorly on both the training and test set. This is known as \textbf{underfitting}.
+To avoid underfitting, we need to choose a more complex model, or to use a more powerful learning algorithm.
+
+\subsubsection{Overfitting}
+If the model is too complex, it may perform well on the training set but poorly on the test set. 
+When the gap between the two errors is large, it means that the model has learned to fit the noise in the training data, rather than the underlying distribution.
+This is known as \textbf{overfitting}.
+
+To avoid overfitting, we can simply use a simpler model, reduce its capacity or we can use regularization techniques.
+
+\subsection{How to choose the algorithm}
