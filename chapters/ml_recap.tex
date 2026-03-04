@@ -180,6 +180,21 @@ If the model is too complex, it may perform well on the training set but poorly 
 When the gap between the two errors is large, it means that the model has learned to fit the noise in the training data, rather than the underlying distribution.
 This is known as \textbf{overfitting}.
 
-To avoid overfitting, we can simply use a simpler model, reduce its capacity or we can use regularization techniques.
+To avoid overfitting, we can use techniques such as:
+\begin{itemize}
+    \item \textbf{Simpler models}: choosing a simpler model with fewer parameters, which is less likely to overfit the training data;
+    \item \textbf{Regularization}: any modification made to a learning algorithm that is intended to reduce the generalization error, but not the training error. Usually,
+    this is done by adding a penalty term to the loss function, which is proportional to the complexity of the model (e.g., adding a term that penalizes large weights in a neural network).
+\end{itemize}
 
 \subsection{How to choose the algorithm}
+To choose the right algorithm for a given problem, we need to consider the following factors:
+\begin{itemize}
+    \item \textbf{Size of the training set}: Some algorithms perform better with small training sets, while others require large training sets to perform well;
+    \item \textbf{Address problem difficulty}: are data linearly separable? Is the problem a regression or a classification problem? Is the output structured?
+    \item \textbf{Prior knowledge}: if prior knowledge about the problem is available, it can be encoded in the model, which can improve performance;
+    \item \textbf{Computational requirements}: do we have any requirements on the computational resources available for training and inference?
+    \item \textbf{Online vs batch learning}: based on the kind of data we have, we may need to choose different algorithms. For example, for streaming data,
+    Neural Network aren't the best choice;
+    \item \textbf{Interpretability}: do we need to understand how the model makes predictions?
+\end{itemize}
