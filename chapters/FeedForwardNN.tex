@@ -1,1 +1,66 @@
 \section{Feed Forward Neural Networks}
+Before we can understand the architecture of a \textbf{feed forward neural network} (FFNN), we first introduce
+how we got here.
+
+\subsection{From Logistic Regression to Feed Forward NN}
+To fit a model to some data distribution, a simple and common approach is to use \textbf{Maximum Likelihood Estimation} (MLE).
+\subsubsection{Maximum Likelihood Estimation}
+In MLE, we want to estimate the parameters of an assumed probability distribution, given some observed data. For example, if we assume that the data is generated from a Gaussian distribution, we can estimate the mean and variance of that distribution using MLE.
+
+More formally, given a dataset $\boldsymbol{X} = \{\boldsymbol{x}_1, \boldsymbol{x}_2, \ldots, \boldsymbol{x}_N\}$ and a known probability distribution $p_{\text{model}}(\boldsymbol{x}|\boldsymbol{\theta})$
+we want to find the parameters $\boldsymbol{\theta}$ that better explain the data.
+\begin{equation}
+    \label{MLE}
+    \boldsymbol{\theta}^* = \arg\max_{\boldsymbol{\theta}} p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta})
+\end{equation}
+Assuming that the data points are independent and identically distributed (i.i.d.), we can express the likelihood as a product of individual probabilities:
+\begin{equation*}
+    p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = \prod_{i=1}^{N} p_{\text{model}}(\boldsymbol{x}_i|\boldsymbol{\theta})
+\end{equation*}
+To simplify the optimization process, we often take the logarithm of the likelihood function, which transforms the product into a sum:
+\begin{equation*}
+    \log p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = \sum_{i=1}^{N} \log p_{\text{model}}(\boldsymbol{x}_i|\boldsymbol{\theta})
+\end{equation*}
+We can show that this is equivalent to considering the expected value of the log-likelihood over the empirical (observed) data distribution:
+\begin{equation*}
+    \log p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = N \cdot \mathbb{E}_{\boldsymbol{x} \sim p_{\text{data}}}[\log p_{\text{model}}(\boldsymbol{x}|\boldsymbol{\theta})]
+\end{equation*}
+where $p_{\text{data}}$ is the empirical distribution of the observed data and $\mathbb{E}_{\boldsymbol{x} \sim p_{\text{data}}}$ denotes the expected value sampled from this distribution.
+
+To find the optimal parameters $\boldsymbol{\theta}^*$, we usually differentiate the log-likelihood with respect to $\boldsymbol{\theta}$ and set it
+to zero. We can then resolve the resulting equation to find the optimal parameters.
+
+The equation \ref{MLE} can also be extended to the case of conditional probability distributions ($p_{\text{model}}(y|\boldsymbol{x}, \boldsymbol{\theta})$) in order to predict a target variable $y$ given an input variable $\boldsymbol{x}$:
+\begin{equation*}
+    \boldsymbol{\theta}^* = \arg\max_{\boldsymbol{\theta}} p_{\text{model}}(y|\boldsymbol{x}, \boldsymbol{\theta})
+\end{equation*}
+This is the basis for most supervised learning algorithms, including Linear Regression and Logistic Regression, which simply assume different forms for the conditional probability distribution.
+For example, in Logistic Regression, we assume that the conditional probability distribution is given by the logistic function:
+\begin{equation}
+    \label{Logistic Regression}
+    p_{\text{model}}(y=1|\boldsymbol{x}, \boldsymbol{\theta}) = \sigma(\boldsymbol{\theta}^T \boldsymbol{x}) = \frac{1}{1 + e^{-\boldsymbol{\theta}^T \boldsymbol{x}}}
+\end{equation}
+
+\subsubsection{Logistic Regression}
+Logistic Regression is a linear model used for binary classification tasks.
+\begin{comment}
+    #TODO: extend here??
+\end{comment}
+Given the equation \ref{Logistic Regression}, we can observe that the can be seen as a simple Neural Network with a single layer and a sigmoid activation function.
+
+\subsection{Feed Forward Neural Networks}
+A Feed Forward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space
+to an output space. The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
+For example, taking in consideration the FFNN architecture shown in the figure \ref{fig:mlp} with three layers, we can express the mapping as follows:
+\begin{equation*}
+    f(\boldsymbol{x}) = f^{(3)(f^{(2)}(f^{(1)}(\boldsymbol{x}))))}
+\end{equation*}
+where $f^{(1)}$, $f^{(2)}$, and $f^{(3)}$ represent the functions corresponding to the first, second, and third layers of the network, respectively.
+
+The last layer of the network is often referred to as the \textbf{output layer}, while the layers before it are called \textbf{hidden layers}.
+The function composition can be described by a \textbf{directed acyclic graph} (DAG), where the nodes represent the functions (layers) and the edges represent the flow of data through the network. 
+The term "feed forward" comes from the fact that the data flows in one direction, from the input layer to the output layer, without any cycles or loops in the graph.
+
+\subsubsection{Difference from Linear Models}
+
+\subsubsection{How can we improve Linear Models?}
