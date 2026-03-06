@@ -1,8 +1,8 @@
-\section{Feed Forward Neural Networks}
-Before we can understand the architecture of a \textbf{feed forward neural network} (FFNN), we first introduce
+\section{Feedforward Neural Networks}
+Before we can understand the architecture of a \textbf{feedforward neural network} (FFNN), we first introduce
 how we got here.
 
-\subsection{From Logistic Regression to Feed Forward NN}
+\subsection{From Logistic Regression to Feedforward NN}
 To fit a model to some data distribution, a simple and common approach is to use \textbf{Maximum Likelihood Estimation} (MLE).
 \subsubsection{Maximum Likelihood Estimation}
 In MLE, we want to estimate the parameters of an assumed probability distribution, given some observed data. For example, if we assume that the data is generated from a Gaussian distribution, we can estimate the mean and variance of that distribution using MLE.
@@ -48,8 +48,8 @@ Logistic Regression is a linear model used for binary classification tasks.
 \end{comment}
 Given the equation \ref{Logistic Regression}, we can observe that the can be seen as a simple Neural Network with a single layer and a sigmoid activation function.
 
-\subsection{Feed Forward Neural Networks}
-A Feed Forward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space
+\subsection{Feedforward Neural Networks}
+A Feedforward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space
 to an output space. The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
 For example, taking in consideration the FFNN architecture shown in the figure \ref{fig:mlp} with three layers, we can express the mapping as follows:
 \begin{equation*}
@@ -59,8 +59,55 @@ where $f^{(1)}$, $f^{(2)}$, and $f^{(3)}$ represent the functions corresponding 
 
 The last layer of the network is often referred to as the \textbf{output layer}, while the layers before it are called \textbf{hidden layers}.
 The function composition can be described by a \textbf{directed acyclic graph} (DAG), where the nodes represent the functions (layers) and the edges represent the flow of data through the network. 
-The term "feed forward" comes from the fact that the data flows in one direction, from the input layer to the output layer, without any cycles or loops in the graph.
+The term "feedforward" comes from the fact that the data flows in one direction, from the input layer to the output layer, without any cycles or loops in the graph.
 
 \subsubsection{Difference from Linear Models}
+Linear models are generally very easy to optimize (e.g., closed-form solutions or convex optimization), but they are limited in their expressiveness and cannot capture interactions between features or non-linear relationships in the data.
+FFNNs allow to overcome the limitations of linear models by introducing non-linear activation functions and multiple layers of computation.
 
 \subsubsection{How can we improve Linear Models?}
+FFNNs are not the only way to improve linear models, but they are one of the most powerful and widely used approaches.
+Generally, to boost the performance of linear models, we can apply a non-linear transformation to the input data $\boldsymbol{x} \rightarrow \phi(\boldsymbol{x})$, where $\phi$ is a non-linear function.
+We can then apply a linear model to the transformed data $\phi(\boldsymbol{x})$. 
+The transformation $\phi$ can be implemented in various ways, such as:
+\begin{itemize}
+    \item \textbf{Kernel Methods}: map the input data into a high-dimensional feature space (possibly infinite-dimensional) where linear models can be applied.
+    This has enough capacity to capture complex relationships in the data, but achieves poor generalization performance for highly variable target functions.
+    \item \textbf{Feature Engineering}: manually design and select features that capture relevant information from the input data.
+    This was the traditional approach before the rise of deep learning, in particular for computer vision tasks, but it is time-consuming and requires domain expertise.
+    \item \textbf{Neural Networks}: learn the transformation $\phi$ from the data itself. This shifts the engineering effort from designing features to designing the architecture of the network,
+    but throwhs away the convexity and interpretability. 
+\end{itemize}
+
+\subsection{Training a NN}
+To train a Neural Network, we need to optimize the parameters of the network (weights $\boldsymbol{\theta}$) to drive the output of the network $f(\boldsymbol{x}; \boldsymbol{\theta})$
+to match the target variable $y$ for a given input $\boldsymbol{x}$.
+
+The training process is nothing different from training any other machine learning model.
+We need to define a loss function $\mathcal{L}(f(\boldsymbol{x}; \boldsymbol{\theta}), y)$ that measures the discrepancy between the predicted output and the true target variable.
+
+The largest difference with respect to linear models comes from the fact that most loss functions are non-convex, which removes the guarantee of finding a global minimum and makes the optimization process more challenging.
+
+\subsection{Modelling Choices}
+When designing a FFNN, we need to make several modelling choices, such as:
+\begin{itemize}
+    \item \textbf{Cost Function}: the choice of the loss function $\mathcal{L}$ depends on the type of problem we are trying to solve (e.g., regression, classification) and the properties of the data.
+    Each function has its own advantages and disadvantages, and the choice can significantly impact the performance of the model.
+    \item \textbf{Form of Output}:
+    \item \textbf{Activation Function}:
+    \item \textbf{Architecture}:
+    \item \textbf{Optimizer}:
+    \item \textbf{Regularizer}:
+\end{itemize}
+
+\begin{comment}
+    #TODO: thing about how to organize the next sections
+\end{comment}
+
+\subsection{Cost Functions}
+
+\subsection{Output Units}
+\subsection{Activation Functions}
+\subsection{Architectures}
+\subsection{Optimizers}
+\subsection{Regularization}

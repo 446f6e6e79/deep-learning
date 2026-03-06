@@ -2,11 +2,11 @@
 A detailed collection of LaTeX-based lecture notes for the Deep Learning course at the University of Trento, academic year 2025/2026, instructed by Prof. Elisa Ricci.
 
 <div align="center">
-    <a href="notes.pdf">
-        <img src="img/notes.png" alt="Notes Preview" width="300px">
+    <a href="DeepLearningNotes.pdf">
+        <img src="media/report-preview.png" alt="Notes Preview" width="300px">
     </a>
     <br>
-    <a href="notes.pdf" style="display: block; margin-top: 10px; font-size: 15px; font-weight: bold; color: #007acc;">
+    <a href="DeepLearningNotes.pdf" style="display: block; margin-top: 10px; font-size: 15px; font-weight: bold; color: #007acc;">
     Download the PDF notes</a>
 </div>
 
