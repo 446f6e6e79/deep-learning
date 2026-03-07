@@ -64,7 +64,6 @@ For example, taking in consideration the FFNN architecture shown in the figure \
 \begin{equation*}
     f(\boldsymbol{x}) = f^{(5)}(f^{(4)}(f^{(3)}(f^{(2)}(f^{(1)}(\boldsymbol{x})))))
 \end{equation*}
-where $f^{(1)}$, $f^{(2)}$, and $f^{(3)}$ represent the functions corresponding to the first, second, and third layers of the network, respectively.
 \begin{itemize}
     \item The first layer $f^{(1)}(\boldsymbol{x})$ is usually referred to as the \textbf{input layer}, each node corresponds to a feature of the input data. Usually no
     computations are performed in this layer, as it simply serves as a conduit for the input data to be fed into the network;
@@ -95,7 +94,7 @@ The transformation $\phi$ can be implemented in various ways, such as:
     but throwhs away the convexity and interpretability. 
 \end{itemize}
 
-\subsection{Training a NN}
+\subsubsection{Training a FFNN}
 To train a Neural Network, we need to optimize the parameters of the network (weights $\boldsymbol{\theta}$) to drive the output of the network $f(\boldsymbol{x}; \boldsymbol{\theta})$
 to match the target variable $y$ for a given input $\boldsymbol{x}$.
 
@@ -104,13 +103,14 @@ We need to define a loss function $\mathcal{L}(f(\boldsymbol{x}; \boldsymbol{\th
 
 The largest difference with respect to linear models comes from the fact that most loss functions are non-convex, which removes the guarantee of finding a global minimum and makes the optimization process more challenging.
 
-\subsection{Modelling Choices}
+\subsubsection{Modelling Choices}
 When designing a FFNN, we need to make several modelling choices, such as:
 \begin{itemize}
     \item \textbf{Cost Function}: the choice of the loss function $\mathcal{L}$ depends on the type of problem we are trying to solve (e.g., regression, classification) and the properties of the data.
     Each function has its own advantages and disadvantages, and the choice can significantly impact the performance of the model.
-    \item \textbf{Form of Output}:
-    \item \textbf{Activation Function}:
+    \item \textbf{Form of Output}: the function applied in the output layer. Similarly to the cost function, the choice of the output units depends on the type of problem we are trying to solve;
+    \item \textbf{Activation Function}: the non-linear function applied in the hidden layers. It's independent from the type of problem we are trying to solve, but it can significantly impact the
+    performance of the model and the convergence during training.
     \item \textbf{Architecture}:
     \item \textbf{Optimizer}:
     \item \textbf{Regularizer}:
@@ -217,67 +217,69 @@ The output units are the last layer of the network, and their choice depends on 
 
 \subsection{Activation Functions}
 Hidden units usually use a different activation function than the output units as it is independent from the type of problem we are trying to solve.
-Different activation can be used, such as:
+
+What's important to note is that in the choice of activation function it is much more important to 
+consider the derivative of the function rather than the function itself, as it is what will be 
+used during the backpropagation process to update the weights of the network.
+\paragraph{Sigmoid}
+Maps the input to a value between 0 and 1, which can be interpreted as a probability. It is defined as:
+\begin{figure}[H]
+    \centering
+    \input{Tikz/FFNN/activation_functions/sigmoid.tex}
+\end{figure}
+This function is smooth and differentiable, but it saturates (approaches 0) across most of its domain,
+which can lead to the problem of vanishing gradients during training.
+
+\paragraph{Hyperbolic Tangent (tanh)}
+Similar to sigmoid but maps the input to a value between -1 and 1. It is defined as:
+\begin{figure}[H]
+    \centering
+    \input{Tikz/FFNN/activation_functions/hyperbolic_tangent.tex}
+\end{figure}
+This is better than the sigmoid function as it is zero-centered, which can help with convergence during training,
+but it still suffers from the saturation problem for large positive and negative values.
+
+\paragraph{ReLU}
+The most commonly used activation function in hidden layers. It is defined as:
+\begin{figure}[H]
+    \centering
+    \input{Tikz/FFNN/activation_functions/relu.tex}
+\end{figure}
+Born to solve the saturation problem of sigmoid and tanh, the ReLU function is in fact non-saturating for positive values (derivative is 1) which allows for faster convergence during training.
+
+However, this function has still a few negative aspects:
 \begin{itemize}
-    \item \textbf{Sigmoid}: maps the input to a value between 0 and 1, which can be interpreted as a probability. It is defined as:
-    \begin{figure}[H]
-        \centering
-        \input{Tikz/FFNN/activation_functions/sigmoid.tex}
-    \end{figure}
-    This function is smooth and differentiable, but it saturates (approaches 0) across most of its domain, 
-    which can lead to the problem of vanishing gradients during training.
-    \item \textbf{Hyperbolic Tangent (tanh)}: similar to sigmoid but maps the input to a value between -1 and 1. It is defined as:
-    \begin{figure}[H]
-        \centering
-        \input{Tikz/FFNN/activation_functions/hyperbolic_tangent.tex}
-    \end{figure}
-    This is better than the sigmoid function as it is zero-centered, which can help with convergence during training, 
-    but it still suffers from the saturation problem for large positive and negative values.
-
-    \item \textbf{ReLU}: is the most commonly used activation function in hidden layers. It is defined as:
-    \begin{figure}[H]
-        \centering
-        \input{Tikz/FFNN/activation_functions/relu.tex}
-    \end{figure}
-    Born to solve the saturation problem of sigmoid and tanh, the ReLU function is in fact non-saturating for positive values (derivative is 1) which allows for faster convergence during training.
-    
-    However, this functions has still a few negatives aspects:
-    \begin{itemize}
-        \item \textbf{Non zero centered output}: similarly to the sigmoid, also the output of the ReLU is non-zero centered;
-        \item \textbf{Dying ReLU}: Whenever the input of a neuron is negative, the output is zero, leading to fewer neurons being activated.
-        This leads to the "dying ReLU" problem, where neurons can become inactive and only output zero for all inputs, which can hinder learning.
-        This usuallt happens when most of the inputs for a neuron are in the negative range, making the function return 0. Also, the gradients for these neurons will be zero,
-        which means that during backpropagation, the weights of these neurons will not be updated, leading to a situation where the neuron is "dead" and cannot recover.
-    \end{itemize}
-    Different solution have been proposed to solve the dying ReLU problem, such as:
-    \begin{itemize}
-        \item \textbf{Stochastic Gradient Descent (SGD)}: the randomness introduced by SGD can help to prevent neurons from dying, as it allows for some updates to the weights even for neurons that are currently inactive.
-        \item \textbf{Lower Learning Rates}: using too high learning rates can cause the weights to update too aggressively, possibly leading to weights in the higly negative range;
-        \item \textbf{Generalized ReLU}: A family of variants of the ReLU function that introduce a non-zero slope for negative inputs, allowing for a small gradient even when the input is negative.
-        Formally, the Generalized ReLU can be expressed as:
-        \begin{equation*}
-        \text{GReLU}(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
-        \end{equation*}
-        where $\alpha$ is a hyperparameter that controls the slope for negative inputs. Different choices of $\alpha$ lead to different variants of the ReLU function, such as:
-        \begin{itemize}
-            \item \textbf{Leaky ReLU}: explained later in the section;
-            \item \textbf{Parametric ReLU (PReLU)}: where $\alpha$ is a learnable parameter that is updated during training;
-            \item \textbf{Randomized ReLU (RReLU)}: where $\alpha$ is randomly sampled from a uniform distribution during training, and fixed to a value during testing;
-            \item \textbf{Exponential Linear Unit (ELU)}: where the function is defined as:
-            \begin{equation*}
-                \text{ELU}(x) = \begin{cases} x & x \geq 0 \\ \alpha (e^x - 1) & x < 0 \end{cases}
-            \end{equation*}
-            This has all the benefits of relu
-        \end{itemize}
-    \end{itemize}
-    \item \textbf{Leaky ReLU}: is a variant of ReLU that allows a small, non-zero gradient for negative values. It is defined as:
-    \begin{figure}[H]
-        \centering
-        \input{Tikz/FFNN/activation_functions/leaky_relu.tex}
-    \end{figure}
+    \item \textbf{Non zero centered output}: similarly to the sigmoid, also the output of the ReLU is non-zero centered;
+    \item \textbf{Dying ReLU}: Whenever the input of a neuron is negative, the output is zero, leading to fewer neurons being activated.
+    This leads to the "dying ReLU" problem, where neurons can become inactive and only output zero for all inputs, which can hinder learning.
+    This usually happens when most of the inputs for a neuron are in the negative range, making the function return 0. Also, the gradients for these neurons will be zero,
+    which means that during backpropagation, the weights of these neurons will not be updated, leading to a situation where the neuron is "dead" and cannot recover.
 \end{itemize}
-What's important to note is that in the choice of activation function is much more important to consider the derivative of the function rather than the function itself, as it is what will be used during the backpropagation process to update the weights of the network.
-
+Different solutions have been proposed to solve the dying ReLU problem, such as:
+\begin{itemize}
+    \item \textbf{Stochastic Gradient Descent (SGD)}: the randomness introduced by SGD can help to prevent neurons from dying, as it allows for some updates to the weights even for neurons that are currently inactive.
+    \item \textbf{Lower Learning Rates}: using too high learning rates can cause the weights to update too aggressively, possibly leading to weights in the highly negative range;
+    \item \textbf{Generalized ReLU}: A family of variants of the ReLU function that introduce a non-zero slope for negative inputs, allowing for a small gradient even when the input is negative.
+    Formally, the Generalized ReLU can be expressed as:
+    \begin{equation*}
+    \text{GReLU}(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
+    \end{equation*}
+    where $\alpha$ is a hyperparameter that controls the slope for negative inputs. Different choices of $\alpha$ lead to different variants of the ReLU function, such as:
+    \begin{itemize}
+        \item \textbf{Leaky ReLU}: a variant of ReLU that allows a small, non-zero gradient for negative values. It is defined as:
+        \begin{figure}[H]
+            \centering
+            \input{Tikz/FFNN/activation_functions/leaky_relu.tex}
+        \end{figure}
+        \item \textbf{Parametric ReLU (PReLU)}: where $\alpha$ is a learnable parameter that is updated during training;
+        \item \textbf{Randomized ReLU (RReLU)}: where $\alpha$ is randomly sampled from a uniform distribution during training, and fixed to a value during testing;
+        \item \textbf{Exponential Linear Unit (ELU)}: where the function is defined as:
+        \begin{equation*}
+            \text{ELU}(x) = \begin{cases} x & x \geq 0 \\ \alpha (e^x - 1) & x < 0 \end{cases}
+        \end{equation*}
+        This has all the benefits of ReLU while avoiding the dying ReLU problem, but requires more computational resources due to the exponential function.
+    \end{itemize}
+\end{itemize}
 
 \subsection{Architectures}
 \subsection{Optimizers}
