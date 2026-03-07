@@ -51,13 +51,29 @@ Given the equation \ref{Logistic Regression}, we can observe that the can be see
 \subsection{Feedforward Neural Networks}
 A Feedforward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space
 to an output space. The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
-For example, taking in consideration the FFNN architecture shown in the figure \ref{fig:mlp} with three layers, we can express the mapping as follows:
+\begin{figure}[H]
+    \centering
+    \scalebox{0.8}{
+        \input{Tikz/FFNN/3-layer-FFNN.tex}
+    }
+    \caption{Example of a feedforward neural network with three hidden layers.}
+    \label{fig:FFNN_example}
+\end{figure}
+
+For example, taking in consideration the FFNN architecture shown in the figure \ref{fig:FFNN_example} with three layers, we can express the mapping as follows:
 \begin{equation*}
-    f(\boldsymbol{x}) = f^{(3)(f^{(2)}(f^{(1)}(\boldsymbol{x}))))}
+    f(\boldsymbol{x}) = f^{(5)}(f^{(4)}(f^{(3)}(f^{(2)}(f^{(1)}(\boldsymbol{x})))))
 \end{equation*}
 where $f^{(1)}$, $f^{(2)}$, and $f^{(3)}$ represent the functions corresponding to the first, second, and third layers of the network, respectively.
-
-The last layer of the network is often referred to as the \textbf{output layer}, while the layers before it are called \textbf{hidden layers}.
+\begin{itemize}
+    \item The first layer $f^{(1)}(\boldsymbol{x})$ is usually referred to as the \textbf{input layer}, each node corresponds to a feature of the input data. Usually no
+    computations are performed in this layer, as it simply serves as a conduit for the input data to be fed into the network;
+    \item The layers $f^{(2)}$, $f^{(3)}$, and $f^{(4)}$ are called \textbf{hidden layers}, and they perform computations on the input data, applying a linear transformation followed by a non-linear activation function.
+    The number of hidden layers and the number of neurons in each hidden layer depend on the architecture of the network and the complexity of the problem being solved.
+    \item The last layer $f^{(5)}$ is called the \textbf{output layer}, and it produces the final output of the network. Depending on the type of problem,
+    different activation functions can be used (e.g., linear for regression, softmax for classification)
+    and different number of neurons can be used (e.g., one for binary classification and regression, one per class for multi-class classification).
+\end{itemize}
 The function composition can be described by a \textbf{directed acyclic graph} (DAG), where the nodes represent the functions (layers) and the edges represent the flow of data through the network. 
 The term "feedforward" comes from the fact that the data flows in one direction, from the input layer to the output layer, without any cycles or loops in the graph.
 
@@ -99,10 +115,6 @@ When designing a FFNN, we need to make several modelling choices, such as:
     \item \textbf{Optimizer}:
     \item \textbf{Regularizer}:
 \end{itemize}
-
-\begin{comment}
-    #TODO: thing about how to organize the next sections
-\end{comment}
 
 \subsection{Cost Functions}
 The porpouse of cost functions is to measure the discrepancy between the predicted output of the network and the true target variable, guiding the parameter optimization process.
@@ -212,29 +224,53 @@ Different activation can be used, such as:
         \centering
         \input{Tikz/FFNN/activation_functions/sigmoid.tex}
     \end{figure}
-    This function is smooth and differentiable, but it saturates (approaches 0) across most of its domain, which can lead to vanishing gradients during training.
+    This function is smooth and differentiable, but it saturates (approaches 0) across most of its domain, 
+    which can lead to the problem of vanishing gradients during training.
     \item \textbf{Hyperbolic Tangent (tanh)}: similar to sigmoid but maps the input to a value between -1 and 1. It is defined as:
     \begin{figure}[H]
         \centering
         \input{Tikz/FFNN/activation_functions/hyperbolic_tangent.tex}
     \end{figure}
-    This is better than the sigmoid function as it is zero-centered, which can help with convergence during training, but it still suffers from the saturation problem.
+    This is better than the sigmoid function as it is zero-centered, which can help with convergence during training, 
+    but it still suffers from the saturation problem for large positive and negative values.
 
     \item \textbf{ReLU}: is the most commonly used activation function in hidden layers. It is defined as:
-    \begin{equation*}
-        \text{ReLU}(x) = \max(0, x)
-    \end{equation*}
     \begin{figure}[H]
         \centering
         \input{Tikz/FFNN/activation_functions/relu.tex}
     \end{figure}
     Born to solve the saturation problem of sigmoid and tanh, the ReLU function is in fact non-saturating for positive values (derivative is 1) which allows for faster convergence during training.
-    However, it can suffer from the "dying ReLU" problem, where neurons can become inactive and only output zero for all inputs, which can hinder learning.
-
+    
+    However, this functions has still a few negatives aspects:
+    \begin{itemize}
+        \item \textbf{Non zero centered output}: similarly to the sigmoid, also the output of the ReLU is non-zero centered;
+        \item \textbf{Dying ReLU}: Whenever the input of a neuron is negative, the output is zero, leading to fewer neurons being activated.
+        This leads to the "dying ReLU" problem, where neurons can become inactive and only output zero for all inputs, which can hinder learning.
+        This usuallt happens when most of the inputs for a neuron are in the negative range, making the function return 0. Also, the gradients for these neurons will be zero,
+        which means that during backpropagation, the weights of these neurons will not be updated, leading to a situation where the neuron is "dead" and cannot recover.
+    \end{itemize}
+    Different solution have been proposed to solve the dying ReLU problem, such as:
+    \begin{itemize}
+        \item \textbf{Stochastic Gradient Descent (SGD)}: the randomness introduced by SGD can help to prevent neurons from dying, as it allows for some updates to the weights even for neurons that are currently inactive.
+        \item \textbf{Lower Learning Rates}: using too high learning rates can cause the weights to update too aggressively, possibly leading to weights in the higly negative range;
+        \item \textbf{Generalized ReLU}: A family of variants of the ReLU function that introduce a non-zero slope for negative inputs, allowing for a small gradient even when the input is negative.
+        Formally, the Generalized ReLU can be expressed as:
+        \begin{equation*}
+        \text{GReLU}(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
+        \end{equation*}
+        where $\alpha$ is a hyperparameter that controls the slope for negative inputs. Different choices of $\alpha$ lead to different variants of the ReLU function, such as:
+        \begin{itemize}
+            \item \textbf{Leaky ReLU}: explained later in the section;
+            \item \textbf{Parametric ReLU (PReLU)}: where $\alpha$ is a learnable parameter that is updated during training;
+            \item \textbf{Randomized ReLU (RReLU)}: where $\alpha$ is randomly sampled from a uniform distribution during training, and fixed to a value during testing;
+            \item \textbf{Exponential Linear Unit (ELU)}: where the function is defined as:
+            \begin{equation*}
+                \text{ELU}(x) = \begin{cases} x & x \geq 0 \\ \alpha (e^x - 1) & x < 0 \end{cases}
+            \end{equation*}
+            This has all the benefits of relu
+        \end{itemize}
+    \end{itemize}
     \item \textbf{Leaky ReLU}: is a variant of ReLU that allows a small, non-zero gradient for negative values. It is defined as:
-    \begin{equation*}
-        \text{Leaky ReLU}(x) = \max(0.1x, x)
-    \end{equation*}
     \begin{figure}[H]
         \centering
         \input{Tikz/FFNN/activation_functions/leaky_relu.tex}

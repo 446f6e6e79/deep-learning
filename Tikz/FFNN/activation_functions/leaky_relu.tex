@@ -1,9 +1,9 @@
 \begin{minipage}{0.45\textwidth}
     \centering
     \[
-    \text{Leaky ReLU}(x) = \begin{cases} \alpha x & x < 0 \\ x & x \geq 0 \end{cases}
+    \text{LeakyReLU}(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
     \]
-    where $\alpha = 0.1$
+    where $\alpha = 0.01$
 \end{minipage}
 \hfill
 \begin{minipage}{0.45\textwidth}
@@ -14,14 +14,20 @@
             ylabel=$\text{Leaky ReLU}(x)$,
             grid=major,
             axis lines=middle,
-            xmin=-3, xmax=6,
+            xmin=-6, xmax=6,
             ymin=-1, ymax=6,
             samples=200,
             width=6cm,
-            height=5cm
+            height=5cm,
+            legend pos=north west,
+            legend style={font=\tiny, inner sep=1pt}
         ]
-            \addplot[blue, thick, domain=-3:0] {0.1*x};
-            \addplot[blue, thick, domain=0:6] {x};
+            \addplot[blue, thick, domain=-7:0] {0.1*x};
+            \addlegendentry{$\text{L\_ReLU}(x)$}
+            \addplot[blue, thick, forget plot, domain=0:6] {x};
+            \addplot[red, dashed, thick, domain=-7:0] {0.1};
+            \addlegendentry{$\text{L\_ReLU}'(x)$}
+            \addplot[red, dashed, thick, forget plot, domain=0:6] {1};
         \end{axis}
     \end{tikzpicture}
 \end{minipage}

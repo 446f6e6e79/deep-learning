@@ -17,11 +17,16 @@
             ymin=-1.2, ymax=1.2,
             samples=200,
             width=6cm,
-            height=5cm
+            height=5cm,
+            legend pos=north west,
+            legend style={font=\tiny, inner sep=1pt}
         ]
             \addplot[blue, thick, domain=-6:6] {tanh(x)};
-            \addplot[dashed, gray] coordinates {(-6,1) (6,1)};
-            \addplot[dashed, gray] coordinates {(-6,-1) (6,-1)};
+            \addlegendentry{$\tanh(x)$}
+            \addplot[red, dashed, thick, domain=-6:6] {1 - tanh(x)^2};
+            \addlegendentry{$\tanh'(x)$}
+            \addplot[dashed, gray, forget plot] coordinates {(-6,1) (6,1)};
+            \addplot[dashed, gray, forget plot] coordinates {(-6,-1) (6,-1)};
         \end{axis}
     \end{tikzpicture}
 \end{minipage}
