@@ -280,7 +280,136 @@ Different solutions have been proposed to solve the dying ReLU problem, such as:
         This has all the benefits of ReLU while avoiding the dying ReLU problem, but requires more computational resources due to the exponential function.
     \end{itemize}
 \end{itemize}
+All this proposed solutions have the common property of being monotonic for positive values. Recently,
+non-monotonic activation functions have been proposed, such as:
+\begin{itemize}
+    \item \textbf{Swish}: defined as $f(x) = x \cdot \sigma(x)$, where $\sigma(x)$ is the sigmoid function.
+    The resulting function is non-monotonic and smooth everywhere, which has shown to perform better than ReLU in some cases, but 
+    it is more computationally expensive due to the sigmoid function.
+    \item \textbf{GelU}: defined as $f(x) = x \cdot \Phi(x)$, where $\Phi(x)$ is an approximation of the cumulative 
+    distribution function of the standard normal distribution.
+    This function integrates the properties of ReLU and regularizations techniques, such as dropout and zoneout.
+\end{itemize}
 
 \subsection{Architectures}
-\subsection{Optimizers}
-\subsection{Regularization}
+When designing a FFNN, we need to make several choices regarding the architecture of the network, such as:
+\begin{itemize}
+    \item \textbf{Number of Layers}: how deep should the network be?
+    \item \textbf{Number of Neurons per Layer}: how many neurons should each layer have?
+    \item \textbf{Expressiveness of the Network}: how complex should the network be to capture the underlying structure of the data?
+\end{itemize}
+We know that a 2-layer Neural network are universal function approximators, which means that they can approximate any continuous 
+function to an arbitrary degree of accuracy, given enough neurons in the hidden layer.
+This implies that we could use a shallow network with a single hidden layer, by increasing the number of neurons in that layer (wide network).
+
+However, in practice, it's not guaranteed that our training algorithm will find the optimal parameters that allow the network to approximate the target function, 
+as we have to take into consideration the problems in optimization and generalization.
+It has been shown that deeper networks can generally capture more complex functions and achieve better generalization performance than shallower networks.
+
+However, increasing the depth of the network is not always the best solution.
+Other approaches instead focused on architecutral design choices rather than depth. In particular, this idea was first explored in the context of Convolutional
+Neural Networks (CNNs), where the use of convolutional layers allows to get better performance with fewer parameters compared to FFNNs with fully connected layers.
+
+\subsection{Backpropagation}
+The perceptron learning algorithm (see \ref{perceptron-training}) is not suitable for training FFNNs,
+as it requires to compute the difference between the predicted output and the ground truth for each training example.
+This is not possible for FFNNs, as in fact for hidden layers we don't have access to the true output, and we need to compute 
+the error based on the output of the network and the true target variable.
+
+To solve this problem, we can use the \textbf{Stochastic Gradient Descent} (SGD) algorithm, in combination with the \textbf{backpropagation} algorithm, 
+which allows to efficiently compute the gradients of the loss function with respect to the parameters of the network.
+
+\subsubsection{Idea behind Backpropagation}
+Before backpropagation, a few ideas were proposed to learn the weights inside a FFNN:
+\begin{itemize}
+    \item \textbf{Randomly perturb the weights}: randomly perturb one weight at a time and check
+    if the loss function decreases. This is inefficient and does not scale well with the number of parameters in the network.
+    \item \textbf{Parallel Perturbation}: randomly perturb all the weights at the same time and check if the loss function decreases.
+    This doesn't help at all, as we would need many perturbations to get a good estimate of the gradient;
+    \item \textbf{Perturb the activations}: randomly perturb the activations of the hidden layers and check if the loss function decreases. 
+    This is more efficient than perturbing the weights, as we have fewer activations than weights, but it still does not scale well with the number of parameters in the network.
+\end{itemize}
+From the last idea, the backpropagation algorithm was born, which instead measure how the loss function changes with respect to the activations of the hidden layers.
+
+\subsubsection{The algorithm}
+The backpropagation algorithm, introduced in the section \ref{introduction-backpropagation}, consists of three main steps:
+\begin{itemize}
+    \item \textbf{Forward Pass}: compute the output of the network for a given input $\boldsymbol{x}$ and the current parameters $\boldsymbol{\theta}$;
+    \item \textbf{Error Computation}: compute the error at the output layer by comparing the predicted output with the true target variable $y$;
+    \item \textbf{Backward Pass}: propagate the error signal back through the network, allowing to update the parameters of the network using the computed gradients.
+\end{itemize}
+As said before, we cannot know from the training data what the expected output of the hidden units should be, but we can compute how
+the error changes with respect to the change in the hidden units.
+
+\subsubsection{An example}
+Before introducing the general case of backpropagation, we can see an example on a simple FFNN:
+\begin{figure}[H]
+    \centering
+    \scalebox{0.72}{\input{Tikz/FFNN/back-prop-example.tex}}
+    \caption{Example of a simple FFNN with two hidden layers.}
+    \label{fig:backpropagation_example}
+\end{figure}
+Given the architecture shown in the figure \ref{fig:backpropagation_example}, we can express the forward pass as follows:
+\begin{equation*}
+    \begin{aligned}
+    \boldsymbol{h_1} &= f(\beta^{(0)} + W^{(0)} \boldsymbol{x}) \\
+    \boldsymbol{h_2} &= f(\beta^{(1)} + W^{(1)} \boldsymbol{h_1}) \\
+    \boldsymbol{h_3} &= f(\beta^{(2)} + W^{(2)} \boldsymbol{h_2}) \\
+    \hat{y} &= \beta^{(3)} + W^{(3)} \boldsymbol{h_3}
+    \end{aligned}
+\end{equation*}
+To compute the SGD update, we need to compute the gradients of the loss function with respect to all the parameters 
+$\theta = \{\beta^{(0)}, W^{(0)}, \beta^{(1)}, W^{(1)}, \beta^{(2)}, W^{(2)}, \beta^{(3)}, W^{(3)}\}$.
+
+To calculate how a small change in a parameter feeding into $h_3$ affects the loss function, we need to know:
+\begin{itemize}
+    \item How a change in $\theta_i$ affects the output of the network $\hat{y}$;
+    \item How a change in $\hat{y}$ affects the loss function $\mathcal{L}(\hat{y}, y)$.
+\end{itemize}
+Considering a deeper layer, such as $h_2$, we need to know:
+\begin{itemize}
+    \item How a change in layer $h_2$ affects $h_3$;
+    \item How a change in $h_3$ affects $\hat{y}$;
+    \item How a change in $\hat{y}$ affects the loss function $\mathcal{L}(\hat{y}, y)$.
+\end{itemize}
+The diagram below shows the dependency chain for a parameter feeding into $h_2$, which can be obviously extended to any parameter in the network, 
+and how the error signal is propagated back through the network to update the parameters.
+\begin{figure}[H]
+    \centering
+    \scalebox{0.5}{\input{Tikz/FFNN/back-prop-focus.tex}}
+    \caption{Dependency chain for a parameter feeding into $h_2$.}
+    \label{fig:backpropagation_output}
+\end{figure}
+Continuing with the same logic, we can compute the gradients for all the parameters in the network, which can then be used to update the parameters using SGD.
+
+\subsubsection{General Case}
+
+\subsection{Optimization}
+\subsubsection{Gradients}
+% #TODO: complete this
+\subsubsection{Gradient Descent}
+Gradient Descent is an optimization algorithm used to minimize the loss function by iteratively updating the parameters of the model
+in the direction of the negative gradient of the loss function with respect to the parameters.
+
+In the general case, we can express the update rule for the parameters $\boldsymbol{\theta}$ as follows:
+\begin{equation*}
+    \nabla \leftarrow  \frac{1}{N} \nabla_{\boldsymbol{\theta}} \sum_{i=1}^{N} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+\end{equation*}
+\begin{equation*}
+    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
+\end{equation*}
+where $\eta$ is the learning rate, which controls the step size of the updates and some parameter initialization is required to start the optimization process.
+
+However, computing the gradient over the entire dataset can be computationally expensive, especially for large datasets.
+
+\subsubsection{Stochastic Gradient Descent}
+Stochastic Gradient Descent (SGD) is a variant of gradient descent that updates the parameters using only a single training example at a time, allowing for faster updates and convergence.
+The update rule for SGD can be expressed as follows:
+\begin{equation*}
+    \nabla \leftarrow  \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+\end{equation*}
+\begin{equation*}
+    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
+\end{equation*}
+where $i$ is randomly selected from the training dataset at each iteration.
+This allows for faster updates and convergence, but it can also introduce more noise into the optimization process, which can lead to a less stable convergence.

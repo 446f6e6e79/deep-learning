@@ -60,6 +60,7 @@ The most important intuition is that the weights $\theta_i$ are not fixed, but r
 The bias term is introduced to allow the model to shift the decision boundary (hyperplane) away from the origin.
 
 \paragraph{Perceptron Learning Algorithm}
+\label{perceptron-training}
 The weights of the perceptron are learned from data using the \textbf{Perceptron Training Rule}.
 Given a set of training examples $\mathcal{T} = \{(\boldsymbol{x_1}, y_1), (\boldsymbol{x_2}, y_2), \ldots, (\boldsymbol{x_N}, y_N)\}$, $y_i \in \{0, 1\}$
 and a learning rate $\eta$, the weights are updated as follows:
@@ -104,6 +105,7 @@ had a major issue, which was the difficulty in computing the weights of the hidd
 This structure was very flexible as multiple nodes could be used in the output layer, so it could be used for multi-class classification problems, and also for regression.
 
 \paragraph{Backpropagation}
+\label{introduction-backpropagation}
 The perceptron learning algorithm was not suitable for training MLPs, as no expected output was available for the hidden layers, but just for the output layer.
 
 Backpropagation is an efficient algorithm for computing the gradients also for large datasets.
