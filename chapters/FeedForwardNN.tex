@@ -310,6 +310,75 @@ However, increasing the depth of the network is not always the best solution.
 Other approaches instead focused on architecutral design choices rather than depth. In particular, this idea was first explored in the context of Convolutional
 Neural Networks (CNNs), where the use of convolutional layers allows to get better performance with fewer parameters compared to FFNNs with fully connected layers.
 
+\subsection{Optimization}
+To train a FFNN, we need to optimize the parameters of the network to minimize the loss function. 
+This is usually done using gradient-based optimization algorithms, such as gradient descent and its variants. 
+
+These algorithms are based on the idea of iteratively updating the parameters of the network in the direction of the steepest descent
+of the loss function, which is given by the negative of the gradient of the loss function with respect to the parameters.
+To better understand this, let's first introduce the concept of gradients.
+
+\subsubsection{Gradients}
+Gradients are a vector of partial derivatives that indicate the \textbf{direction} and \textbf{magnitude} of the \textbf{steepest ascent} of a function. 
+Given the loss function $\mathcal{L}(\boldsymbol{W})$, the gradient with respect to the parameters $w_i$ is given by:
+\begin{equation*}
+    \nabla_{w_i} \mathcal{L} = \left[ \frac{\partial \mathcal{L}}{\partial w_1}, \frac{\partial \mathcal{L}}{\partial w_2}, \ldots, \frac{\partial \mathcal{L}}{\partial w_N} \right]
+\end{equation*}
+Each component of the gradient vector $\frac{\partial \mathcal{L}}{\partial w_i}$ measures the rate of change of the loss function 
+with respect to each parameter.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{media/FFNN/partial_derivatives.pdf}
+    \caption{Visualization of derivatives and gradients.}
+\end{figure}
+If we move on the opposite side of the gradients, we will be moving in the direction of the \textbf{steepest descent} of the loss function.
+This way, these algorithms can iteratively explore the parameter space to find the optimal parameters that minimize the loss function.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{media/FFNN/gradient-descent.pdf}
+    \caption{Visualization of Gradient Descent.}
+\end{figure}
+
+\subsubsection{Problems with gradients}
+By now we know that in neural networks, the loss function is usually non-convex, which means that it can have multiple local minima and saddle points.
+
+\paragraph{Local minima} Local minima are points in the parameter space where the loss function has a lower value than in the surrounding area,
+but it is not the global minimum. This can lead to suboptimal performance of the model.
+
+\paragraph{Saddle points} Similarly, saddle points are points in the parameter space where the loss function has a gradient of zero,
+but does not correspond to a local minimum.
+
+Both local minima and saddle points are issues that can arise during the optimization process. Altough they can lead to suboptimal performance,
+there are still other issues regarding optimization, that are much more important.
+
+\subsubsection{Gradient Descent}
+Gradient Descent is an optimization algorithm used to minimize the loss function by iteratively updating the parameters of the model
+in the direction of the negative gradient of the loss function with respect to the parameters.
+
+In the general case, we can express the update rule for the parameters $\boldsymbol{\theta}$ as follows:
+\begin{equation*}
+    \nabla \leftarrow  \frac{1}{N} \nabla_{\boldsymbol{\theta}} \sum_{i=1}^{N} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+\end{equation*}
+\begin{equation*}
+    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
+\end{equation*}
+where $\eta$ is the learning rate, which controls the step size of the updates and some parameter initialization is required to start the optimization process.
+
+
+However, computing the gradient over the entire dataset can be computationally expensive, especially for large datasets.
+
+\subsubsection{Stochastic Gradient Descent}
+Stochastic Gradient Descent (SGD) is a variant of gradient descent that updates the parameters using only a single training example at a time, allowing for faster updates and convergence.
+The update rule for SGD can be expressed as follows:
+\begin{equation*}
+    \nabla \leftarrow  \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+\end{equation*}
+\begin{equation*}
+    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
+\end{equation*}
+where $i$ is randomly selected from the training dataset at each iteration.
+This allows for faster updates and convergence, but it can also introduce more noise into the optimization process, which can lead to a less stable convergence.
+
 \subsection{Backpropagation}
 The perceptron learning algorithm (see \ref{perceptron-training}) is not suitable for training FFNNs,
 as it requires to compute the difference between the predicted output and the ground truth for each training example.
@@ -318,7 +387,6 @@ the error based on the output of the network and the true target variable.
 
 To solve this problem, we can use the \textbf{Stochastic Gradient Descent} (SGD) algorithm, in combination with the \textbf{backpropagation} algorithm, 
 which allows to efficiently compute the gradients of the loss function with respect to the parameters of the network.
-
 \subsubsection{Idea behind Backpropagation}
 Before backpropagation, a few ideas were proposed to learn the weights inside a FFNN:
 \begin{itemize}
@@ -341,75 +409,74 @@ The backpropagation algorithm, introduced in the section \ref{introduction-backp
 As said before, we cannot know from the training data what the expected output of the hidden units should be, but we can compute how
 the error changes with respect to the change in the hidden units.
 
-\subsubsection{An example}
-Before introducing the general case of backpropagation, we can see an example on a simple FFNN:
+\subsubsection{Single Neuron Case}
+Let's first consider a neural network with just one neuron in each layer.
+After performing the forward pass, we can express the output of the network as follows:
+\begin{equation*}
+    a^{(L)} = \sigma(z^{(L)}) = \sigma(w^{(L)} a^{(L-1)} + b^{(L)})
+\end{equation*}
+where $a^{(L)}$ is the output of the last layer, $\sigma$ is a non-linear activation function, 
+$w^{(L)}$ and $b^{(L)}$ are respectively the weight and bias of the last layer, and $a^{(L-1)}$ is the output of the previous layer.
+
+Our goal is to understand how a small change in the parameters $w^{(l)}$ will affect the loss function $\mathcal{L}$.
+When computing this, we need to consider the chain of dependencies between the parameters and the loss function:
+\begin{itemize}
+    \item How a change in $w^{(l)}$ affects the output of the layer $z^{(l)}$;
+    \item How a change in $z^{(l)}$ affects the output of the layer $a^{(l)}$;
+    \item How a change in $a^{(l)}$ affects the loss function $\mathcal{L}$.
+\end{itemize}
+This is where the chain rule of calculus comes into play, allowing us to compute the gradient of the 
+loss function with respect to the parameters by multiplying the gradients along the chain of dependencies.
+
+Formally, we can express the gradient of the loss function with respect to the parameters $w^{(l)}$ as follows:
+\begin{equation*}
+    \frac{\partial \mathcal{L}}{\partial w^{(l)}} = \frac{\partial z^{(l)}}{\partial w^{(l)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a^{(l)}}
+\end{equation*}
+where respectively:
+\begin{itemize}
+    \item $\frac{\partial z^{(l)}}{\partial w^{(l)}}$ measures how a small change in the weight $w^{(l)}$ affects the output of the layer $z^{(l)}$;
+    \item $\frac{\partial a^{(l)}}{\partial z^{(l)}}$ measures how a small change in the output of the layer $z^{(l)}$ affects the output of the activation function $a^{(l)}$;
+    \item $\frac{\partial \mathcal{L}}{\partial a^{(l)}}$ measures how a small change in the output of the activation function $a^{(l)}$ affects the loss function $\mathcal{L}$.
+\end{itemize}
+The process can be extended to deeper layers. In those cases, we need to consider the chain of dependencies from the parameter we want to update
+to the output of the network, computing the gradients along the way using the chain rule of calculus.
 \begin{figure}[H]
     \centering
-    \scalebox{0.72}{\input{Tikz/FFNN/back-prop-example.tex}}
-    \caption{Example of a simple FFNN with two hidden layers.}
-    \label{fig:backpropagation_example}
+    \includegraphics[width=\textwidth]{media/FFNN/dependencies.pdf}
+    \caption{Dependency chain for a parameter in a deep network.}
 \end{figure}
-Given the architecture shown in the figure \ref{fig:backpropagation_example}, we can express the forward pass as follows:
+Taking in consideration the architecture shown in the figure above, we can express the derivative of the loss function with respect to a parameter $w^{(l-1)}$ in a deeper layer as follows:
 \begin{equation*}
-    \begin{aligned}
-    \boldsymbol{h_1} &= f(\beta^{(0)} + W^{(0)} \boldsymbol{x}) \\
-    \boldsymbol{h_2} &= f(\beta^{(1)} + W^{(1)} \boldsymbol{h_1}) \\
-    \boldsymbol{h_3} &= f(\beta^{(2)} + W^{(2)} \boldsymbol{h_2}) \\
-    \hat{y} &= \beta^{(3)} + W^{(3)} \boldsymbol{h_3}
-    \end{aligned}
+    \frac{\partial \mathcal{L}}{\partial w^{(l-1)}} = \frac{\partial z^{(l-1)}}{\partial w^{(l-1)}} \cdot \frac{\partial a^{(l-1)}}{\partial z^{(l-1)}} \cdot \underbrace{\frac{\partial z^{(l)}}{\partial a^{(l-1)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a^{(l)}}}_{\frac{\partial \mathcal{L}}{\partial a^{(l-1)}}}
 \end{equation*}
-To compute the SGD update, we need to compute the gradients of the loss function with respect to all the parameters 
-$\theta = \{\beta^{(0)}, W^{(0)}, \beta^{(1)}, W^{(1)}, \beta^{(2)}, W^{(2)}, \beta^{(3)}, W^{(3)}\}$.
+\subsubsection{General Case}
+The general case of backpropagation doesn't differ much from the single neuron case. We simply have to consider all the possible
+way in which a change in a parameter can affect the loss function, and compute the gradients accordingly using the chain rule of calculus.
 
-To calculate how a small change in a parameter feeding into $h_3$ affects the loss function, we need to know:
-\begin{itemize}
-    \item How a change in $\theta_i$ affects the output of the network $\hat{y}$;
-    \item How a change in $\hat{y}$ affects the loss function $\mathcal{L}(\hat{y}, y)$.
-\end{itemize}
-Considering a deeper layer, such as $h_2$, we need to know:
-\begin{itemize}
-    \item How a change in layer $h_2$ affects $h_3$;
-    \item How a change in $h_3$ affects $\hat{y}$;
-    \item How a change in $\hat{y}$ affects the loss function $\mathcal{L}(\hat{y}, y)$.
-\end{itemize}
-The diagram below shows the dependency chain for a parameter feeding into $h_2$, which can be obviously extended to any parameter in the network, 
-and how the error signal is propagated back through the network to update the parameters.
+To take into account the fact that each layer can have multiple neurons, we also need to update the notation. Since each connection in the network has its own weight,
+we represent with $w_{ij}^{(l)}$ the weight connecting the $j$-th neuron in layer $l-1$ to the $i$-th neuron in layer $l$.
+
+The weighted sum for the $i$-th neuron in layer $l$ can be expressed as follows:
+\begin{equation*}
+    z_i^{(l)} = \sum_{j} w_{ij}^{(l)} a_j^{(l-1)} + b_i^{(l)}
+\end{equation*}
+where $a_j^{(l-1)}$ is the output of the $j$-th neuron in the previous layer, and $b_i^{(l)}$ is the bias term for the $i$-th neuron in layer $l$.
+
+When we consider the output layer neurons, the chain of dependencies remains the same as in the single neuron case, as each output neuron is directly connected to the loss function.
+\begin{equation*}
+    \frac{\partial \mathcal{L}}{\partial w_{ij}^{(L)}} = \frac{\partial z_i^{(L)}}{\partial w_{ij}^{(L)}} \cdot \frac{\partial a_i^{(L)}}{\partial z_i^{(L)}} \cdot \frac{\partial \mathcal{L}}{\partial a_i^{(L)}}
+\end{equation*}
+
+For the hidden layer neurons, we instead need to consider all the possible paths from the parameter we want to update to the output layer, and compute the gradients accordingly.
 \begin{figure}[H]
     \centering
     \scalebox{0.5}{\input{Tikz/FFNN/back-prop-focus.tex}}
     \caption{Dependency chain for a parameter feeding into $h_2$.}
     \label{fig:backpropagation_output}
 \end{figure}
-Continuing with the same logic, we can compute the gradients for all the parameters in the network, which can then be used to update the parameters using SGD.
-
-\subsubsection{General Case}
-
-\subsection{Optimization}
-\subsubsection{Gradients}
-% #TODO: complete this
-\subsubsection{Gradient Descent}
-Gradient Descent is an optimization algorithm used to minimize the loss function by iteratively updating the parameters of the model
-in the direction of the negative gradient of the loss function with respect to the parameters.
-
-In the general case, we can express the update rule for the parameters $\boldsymbol{\theta}$ as follows:
 \begin{equation*}
-    \nabla \leftarrow  \frac{1}{N} \nabla_{\boldsymbol{\theta}} \sum_{i=1}^{N} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+    \frac{\partial \mathcal{L}}{\partial a_j^{(l-1)}} = \sum_{i} \frac{\partial z_i^{(l)}}{\partial a_j^{(l-1)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a_i^{(l)}}
 \end{equation*}
-\begin{equation*}
-    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
-\end{equation*}
-where $\eta$ is the learning rate, which controls the step size of the updates and some parameter initialization is required to start the optimization process.
 
-However, computing the gradient over the entire dataset can be computationally expensive, especially for large datasets.
 
-\subsubsection{Stochastic Gradient Descent}
-Stochastic Gradient Descent (SGD) is a variant of gradient descent that updates the parameters using only a single training example at a time, allowing for faster updates and convergence.
-The update rule for SGD can be expressed as follows:
-\begin{equation*}
-    \nabla \leftarrow  \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
-\end{equation*}
-\begin{equation*}
-    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
-\end{equation*}
-where $i$ is randomly selected from the training dataset at each iteration.
-This allows for faster updates and convergence, but it can also introduce more noise into the optimization process, which can lead to a less stable convergence.
+
