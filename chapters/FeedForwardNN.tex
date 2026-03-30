@@ -350,34 +350,263 @@ but does not correspond to a local minimum.
 
 Both local minima and saddle points are issues that can arise during the optimization process. Altough they can lead to suboptimal performance,
 there are still other issues regarding optimization, that are much more important.
-
 \subsubsection{Gradient Descent}
-Gradient Descent is an optimization algorithm used to minimize the loss function by iteratively updating the parameters of the model
+
+\subsubsection*{Batch Gradient Descent}
+Batch Gradient Descent is an optimization algorithm used to minimize the loss function by iteratively updating the parameters of the model
 in the direction of the negative gradient of the loss function with respect to the parameters.
 
 In the general case, we can express the update rule for the parameters $\boldsymbol{\theta}$ as follows:
-\begin{equation*}
-    \nabla \leftarrow  \frac{1}{N} \nabla_{\boldsymbol{\theta}} \sum_{i=1}^{N} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
-\end{equation*}
-\begin{equation*}
-    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
-\end{equation*}
+
+\begin{algorithm}[H]
+    \caption{Batch Gradient Descent}
+    \begin{algorithmic}[1]
+        \Require{Learning rate $\eta$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \While {stopping criteria not met}
+            \State Compute \textbf{gradient} estimate over the entire dataset:
+            \State $\nabla \leftarrow \frac{1}{N} \sum\limits_{i=1}^{N} \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)})$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
 where $\eta$ is the learning rate, which controls the step size of the updates and some parameter initialization is required to start the optimization process.
 
+This allows for more stable gradient updates. However, computing the gradient over the entire dataset can be computationally expensive, especially for large datasets.
 
-However, computing the gradient over the entire dataset can be computationally expensive, especially for large datasets.
+\begin{definition}{Remarks on Learning Rate}
+    {
+        For better result, the learning rate $\eta$ should be adjusted during training, starting with a higher 
+        value and gradually decreasing it as the optimization process progresses.
+        This can be defined trough the Learning Rate Schedule:
+        \begin{equation*}
+            \eta_k = (1 - \alpha)\eta_0 + \alpha \eta_{\tau}\;\;\alpha = \frac{k}{\tau}
+        \end{equation*}
+        
+        The starting value of the learning must be choosen by trying different values and analyzing the 
+        learning curves on the validation set.
+        \begin{itemize}
+            \item If the Learning Rate is too large, the curves will show big oscillations.
+            \item If it is too low, learning proceeds too slowly.
+        \end{itemize}
+    }
+\end{definition}
 
-\subsubsection{Stochastic Gradient Descent}
+\subsubsection*{Stochastic Gradient Descent}
 Stochastic Gradient Descent (SGD) is a variant of gradient descent that updates the parameters using only a single training example at a time, allowing for faster updates and convergence.
 The update rule for SGD can be expressed as follows:
+\begin{algorithm}[H]
+    \caption{Stochastic Gradient Descent}
+    \begin{algorithmic}[1]
+        \Require{Learning rate $\eta$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \While {stopping criteria not met}
+            \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
+            \State $\nabla \leftarrow \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)})$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
+This allows for faster updates and convergence, but causes a non-smooth optimization process.
+This is not always a bad thing, as it can help to escape local minima and saddle points, but it can also lead to more noisy updates and slower convergence.
+
+\subsubsection*{Mini Batch}
+To mitigate the issues of both Batch Gradient Descent and Stochastic Gradient Descent, we can use Mini Batch Gradient Descent. Instead
+of using the entire dataset or a single training example, we can use a small batch of training examples to compute the gradient and update the parameters.
+The size of the mini batch is a hyperparameter that can be tuned based on the specific problem, dataset size, and hardware constraints.
+
+This has many advantages. First, its computation isn't dependent on the size of the dataset anymore,
+allowing computations on extremly large datasets.
+Secondly, it allows for parallelization of the computations, as we can compute the gradients for each mini batch in parallel, which can significantly speed up the training process.
+Finally, it provides a good balance between the stability of Batch Gradient Descent and the speed of Stochastic Gradient Descent.
+
+However, along flat direction of the loss function, the gradient steps can be very small, leading to slow convergence.
+In steep ravines, the gradient steps can be very large, leading to oscillations and divergence.
+To mitigate these issues, the concept of momentum was introduced.
+
+\subsubsection{SGD with Momentum}
+To solve the issues of slow convergence along flat directions and oscillations in steep ravines, we can introduce the concept of momentum into the SGD algorithm.
+
+The idea is to introduce a \textbf{velocity} term $v$ that accumulates the gradients over time, allowing for faster convergence and smoother updates.
+This can be represented by exponentially decaing moving average of the negative gradients, which can be expressed as follows:
 \begin{equation*}
-    \nabla \leftarrow  \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}_i; \boldsymbol{\theta}), y_i)
+    v \leftarrow \alpha v - \eta \nabla_{\boldsymbol{\theta}} (\mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)}))
+\end{equation*}
+Where $\alpha$ is the momentum hyperparameter that controls the contribution of the previous velocity to the current update.
+
+The update rule for the parameters can then be expressed as follows:
+\begin{algorithm}[H]
+    \caption{Stochastic Gradient Descent with Momentum}
+    \begin{algorithmic}[1]
+        \Require{Learning rate $\eta$}
+        \Require{Momentum hyperparameter $\alpha$}
+        \Require{Initial velocity $v$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \While {stopping criteria not met}
+            \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
+            \State $\nabla \leftarrow \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)})$
+            \State $v \leftarrow \alpha v - \eta \nabla$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + v$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[H]
+    \centering
+    \scalebox{0.3}{\input{Tikz/FFNN/optimization/BGD-SGD-Momentum.tex}}
+    \caption{Different optimization algorithms.}
+\end{figure}
+
+\subsubsection*{SGD with Nesterov Momentum}
+Nesterov Momentum is a variant of the momentum method that provides a look-ahead mechanism to improve convergence.
+It works by first taking a step in the direction of the previous velocity (momentum) and 
+then computing the gradient at the new position, which allows for a more informed update of the parameters.
+
+This helps because, while the gradient always point to the right direction, the momentum can sometimes lead to 
+overshooting or oscillations. The look-ahead mechanism of Nesterov Momentum allows to mitigate these issues by providing a correction
+to the momentum update on the same step.
+\begin{figure}[H]
+    \centering
+    \scalebox{0.7}{\input{Tikz/FFNN/optimization/momentum-methods.tex}}
+    \caption{Different optimization algorithms.}
+\end{figure}
+
+The update rule for Nesterov Momentum can be expressed as follows:
+\begin{algorithm}[H]
+    \caption{Stochastic Gradient Descent with Nesterov Momentum}
+    \begin{algorithmic}[1]
+        \Require{Learning rate $\eta$}
+        \Require{Momentum hyperparameter $\alpha$}
+        \Require{Initial velocity $v$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \While {stopping criteria not met}
+            \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
+            \State $\nabla \leftarrow \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta} + \alpha v), y^{(i)})$
+            \State $v \leftarrow \alpha v - \eta \nabla$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} + v$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
+This look-ahead mechanism allows Nesterov Momentum to achieve faster convergence and slightly better 
+performance compared to standard momentum.
+
+\subsubsection{Adaptive Learning Rates Methods}
+So far, we have seen optimization algorithms that use a fixed learning rate $\eta$ for all parameters. This means that
+each of the parameters has the same importance during the optimization process, which is not always the case.
+
+Adaptive learning rate methods are a family of optimization algorithms that adjust the learning rate for each parameter based on the historical gradients.
+\subsubsection*{Adagrad}
+Adagrad is an optimization algorithm that adapts the learning rate for each parameter by scaling 
+it inversely proportional to the square root of the accumulated squared gradients.
+
+In other words, it assigns a separate learning rate to each parameter based on how 
+frequently it has been updated in the past. 
+Parameters with large or frequent gradients receive smaller effective learning rates, 
+while parameters with infrequent or small gradients receive larger learning rates.
+
+The update rule for Adagrad can be expressed as follows:
+\begin{algorithm}[H]
+    \caption{Adagrad}
+    \begin{algorithmic}[1]
+        \Require{Initial learning rate $\eta$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \Require{Initial accumulated squared gradients $r = 0$}
+            \While {stopping criteria not met}
+            \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
+            \State $\nabla \leftarrow \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)})$
+            \State $r \leftarrow r + \nabla^2$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \frac{\eta}{\sqrt{r} + \delta} \nabla$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
+where $\delta$ is a small constant added to prevent division by zero.
+
+Adagrad started was the first adaptive learning rate method, that started a real trend in Deep Learning, but it has some issues.
+In particular, the weight decay can be too aggressive, as the accumulated squared gradients can grow very large, leading to very small effective 
+learning rates and slow convergence.
+
+\subsubsection*{RMSProp}
+The problem of Adagrad can be mitigated in non-convex settings by replacing the accumulated squared gradients with 
+an exponentially decaying average of the gradient.
+
+In non-convex optimization, the Adagrad accumulator $r$ grows indefinitely, 
+eventually shrinking the learning rate to a point where the model stops learning before reaching a local minimum. 
+RMSProp "forgets" some of the past, allowing it to adapt to the local curvature of the loss surface.
+
+The update rule for RMSProp can be expressed as follows:
+\begin{algorithm}[H]
+    \caption{RMSProp}
+    \begin{algorithmic}[1]
+        \Require{Initial learning rate $\eta$}
+        \Require{Initial parameters $\boldsymbol{\theta}$}
+        \Require{Initial accumulated squared gradients $r = 0$}
+            \While {stopping criteria not met}
+            \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
+            \State $\nabla \leftarrow \nabla_{\boldsymbol{\theta}} \mathcal{L}(f(\boldsymbol{x}^{(i)}; \boldsymbol{\theta}), y^{(i)})$
+            \State $r \leftarrow \beta r + (1 - \beta) \nabla^2$
+            \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \frac{\eta}{\sqrt{r} + \delta} \nabla$
+        \EndWhile
+        \State \textbf{Output:} Learned parameters $\boldsymbol{\theta}$
+    \end{algorithmic}
+\end{algorithm}
+where $\beta$ is a decay factor.
+
+It's important to note that there is also a variant of RMSProp that includes the Nesterov Momentum, which can further improve convergence and performance.
+
+\subsubsection*{Adam}
+\begin{comment}
+    #TODO: complete with video lecture
+\end{comment}
+Adam (Adaptive Moment Estimation) is an optimization algorithm that combines the benefits of both momentum and adaptive learning rates.
+It computes adaptive learning rates for each parameter by keeping an exponentially decaying average of both the gradients and the squared gradients.
+
+\subsubsection{Batch Normalization}
+Batch Normalization is a technique introduced to resolve the problem of internal covariate shift. As learning proceeds, the distribution of each layer's inputs
+change as the parameters of the previous layers change. 
+This can slow down the training process, as the network needs to continuously adapt to the changing input distribution.
+
+Batch Normalization allows to normalize the inputs of each layer to have zero mean and unit variance, which helps to stabilize the learning process and allows for faster convergence.
+
+\paragraph{Standard Batch Normalization}
+To perform batch normalization, we first need to compute the mean and standard deviation of the inputs.
+Suppose that $H$ is the input of a mini-batch to a layer, we can compute the mean and standard deviation as follows:
+\begin{equation*}
+    \mu_B = \frac{1}{m} \sum_{i=1}^{m} H_i
 \end{equation*}
 \begin{equation*}
-    \boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \eta \nabla
+    \sigma_B = \sqrt{ \delta + \frac{1}{m} \sum_{i=1}^{m} (H_i - \mu_B)^2}
 \end{equation*}
-where $i$ is randomly selected from the training dataset at each iteration.
-This allows for faster updates and convergence, but it can also introduce more noise into the optimization process, which can lead to a less stable convergence.
+To standardize the inputs, we can then substitute the original inputs $H$ with the normalized inputs $\hat{H}$, which can be expressed as follows:
+\begin{equation*}
+    \hat{H} = \frac{H - \mu_B}{\sigma_B}
+\end{equation*}
+
+\paragraph{Learnable Parameters}
+While standard batch normalization helps to stabilize the learning process, standardizing the output of units can limit the expressiveness of the network.
+
+To solve this problem, we can introduce learnable parameters $\gamma$ (scale) and $\beta$ (bias) that allow to scale and shift the normalized inputs. 
+The update of the feature matrix $H$ can then be expressed as follows:
+\begin{equation*}
+    H' = \gamma \hat{H} + \beta
+\end{equation*}
+This allows the network to learn a linear transformation of the normalized inputs, which can help to improve the expressiveness 
+of the network while still benefiting from the stabilization provided by batch normalization.
+
+\paragraph{Training and Testing}
+During training, the backpropagation algorithm is used to update the parameters $\gamma$ and $\beta$ based on the gradients of the loss function with respect to these parameters.
+
+During testing, the running avareges of $\mu$ and $\sigma$ are collected during training and used to normalize the inputs, instead of computing the mean and standard deviation from the mini-batch of test data.
+This is done to ensure that each example is threated independently during testing.
+
+\paragraph{Properties}
+
+\paragraph{Layer Normalization}
+\paragraph{Instance Normalization}
 
 \subsection{Backpropagation}
 The perceptron learning algorithm (see \ref{perceptron-training}) is not suitable for training FFNNs,
@@ -478,5 +707,5 @@ For the hidden layer neurons, we instead need to consider all the possible paths
     \frac{\partial \mathcal{L}}{\partial a_j^{(l-1)}} = \sum_{i} \frac{\partial z_i^{(l)}}{\partial a_j^{(l-1)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a_i^{(l)}}
 \end{equation*}
 
-
+\subsection{Regularization}
 
