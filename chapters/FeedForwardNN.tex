@@ -600,12 +600,22 @@ of the network while still benefiting from the stabilization provided by batch n
 \paragraph{Training and Testing}
 During training, the backpropagation algorithm is used to update the parameters $\gamma$ and $\beta$ based on the gradients of the loss function with respect to these parameters.
 
-During testing, the running avareges of $\mu$ and $\sigma$ are collected during training and used to normalize the inputs, instead of computing the mean and standard deviation from the mini-batch of test data.
+During testing, the running avareges of $\mu$ and $\sigma$ collected during training and used to normalize the inputs, instead of computing the mean and standard deviation from the mini-batch of test data.
 This is done to ensure that each example is threated independently during testing.
 
 \paragraph{Properties}
+Batch Normalization was firstly introduced to solve the problem of internal covariate shift, 
+but many other properties of this technique have been discovered since then, such as:
+\begin{itemize}
+    \item Improves gradient flow through the network, allowing for faster convergence and better performance;
+    \item Allows for higher learning rates, which can further speed up the training process;
+    \item Reduces the strong dependence on the initialization of the parameters;
+    \item Acts as a regularizer, reducing the need for other regularization techniques.
+\end{itemize}
 
 \paragraph{Layer Normalization}
+Other normalization schema have been proposed to solve the problem of internal covariate shift, such as Layer Normalization. 
+
 \paragraph{Instance Normalization}
 
 \subsection{Backpropagation}
@@ -708,4 +718,72 @@ For the hidden layer neurons, we instead need to consider all the possible paths
 \end{equation*}
 
 \subsection{Regularization}
+As you might have experienced, with FFNNs, overfitting is a common problem that needs to be addressed. 
 
+\subsection{Model Capacity}
+Model capacity refers to the ability of a model to fit a wide variety of functions. We have that:
+\begin{itemize}
+    \item \textbf{Low capacity models} may underfit the data, as they are not able to capture the underlying structure of the data;
+    \item \textbf{High capacity models} may overfit the data, by memorizing properties of the training data that are not generalizable to unseen data.
+\end{itemize}
+We can control the capacity of a model by adjusting the hypotheses space, which is the set of all possible functions that
+the model can represent.
+
+To deal with overfitting, we need to find a good balance between the capacity of the model and its ability to generalize to unseen data.
+
+\subsubsection{Simple approach}
+In addition to controlling the model capacity, many techniques have been proposed to control overfitting, some of which where already known in the context of machine learning, such as:
+\begin{itemize}
+    \item \textbf{Collecting more data}: acquiring more training data can help to reduce overfitting, as it allows to better represent the underlying distribution of the data.
+    However, this is not always a valiable option, as it might be expensive to acquire more data;
+    \item \textbf{Ensemble methods}: combining the predictions of multiple models can help to reduce overfitting, as it allows to average out the errors of individual models;
+\end{itemize}
+
+\subsubsection{Regularization Methods}
+For deeper architectures, controlling the complexity of the model is not as simple as adjusting the number of parameters.
+Many techniques have been proposed to regularize such complex models, without reducing their capacity.
+Commonly, many regularization methods can be combined to achieve better performance, as they often have complementary effects on the model.
+
+In this section, we will discuss some of the most common regularization methods used in the context of FFNNs.
+
+\paragraph{Parameter Norm Penalties}
+One of the most common regularization techniques is to add a penalty term to the loss function that encourages the model to have smaller weights.
+The general formulation of this regularization technique can be expressed as follows:
+\begin{equation*}
+    \mathcal{L}_{\text{reg}}(\boldsymbol{\theta}) = \mathcal{L}(\boldsymbol{\theta}) + \lambda \Omega(\boldsymbol{\theta})
+\end{equation*}
+where $\mathcal{L}(\boldsymbol{\theta})$ is the original loss function, $\Omega(\boldsymbol{\theta})$ is the regularization term, and $\lambda$
+is a hyperparameter that controls the strength of the regularization.
+
+The most common choices for the regularization term $\Omega(\boldsymbol{\theta})$ are:
+\begin{itemize}
+    \item \textbf{L2 Regularization}: also known as Ridge Regression, it adds a penalty term that encourages the model to have smaller weights 
+    by adding the squared norm of the weights to the loss function. The regularization term can be expressed as follows:
+    \begin{equation*}
+        \Omega(\boldsymbol{\theta}) = \frac{1}{2} \sum_{i} ||\theta_i^2||
+    \end{equation*}
+    \item \textbf{L1 Regularization}: also known as Lasso Regression, it adds a penalty term proportional to the absolute value of the weights.
+    Differently from L2 regularization, L1 regularization favors the sparsity of the weights, setting the weights of less important features to zero. 
+    The regularization term can be expressed as follows:
+    \begin{equation*}
+        \Omega(\boldsymbol{\theta}) = \sum_{i} ||\theta_i||
+    \end{equation*}
+\end{itemize}
+\begin{comment}
+    #TODO: add visualiztion of l1 and l2
+\end{comment}
+
+\paragraph{Data Augmentation}
+Data augmentation is a technique that involves creating new synthetic training examples by applying transformations to the original training data.
+This is based on the idea that generated images help the model generalize better to diverse data by exposing it to a wider variety of examples during training.
+
+It is important to note that this method is primarily applicable to data types—such as images—where transformations can 
+be applied without changing the identity of the object (invariance). 
+For example, in image classification, we can apply transformations like rotation, scaling, and flipping, which do not change the image's class.
+
+However, these transformations must be chosen carefully based on the task. For example, in the MNIST digit classification task, we cannot apply a 180 degree rotation to 
+images of the classes "6" and "9," as it would change the class of the image.
+
+Furthermore, data augmentation does not always guarantee better performance. While it introduces new samples, 
+these examples may not add sufficient functional diversity to the training set since they are 
+merely variations of existing data rather than entirely new information.
