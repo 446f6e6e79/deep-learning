@@ -83,7 +83,7 @@ levels of the network during training.
     Consequently, to minimize the expected loss, the network is encouraged to maintain smaller weights, mimicking the effect of $L_2$ regularization. 
     High levels of noise typically generate a smoother mapping function, improving generalization performance.
 
-    This concept is also foundational to \texttt{Denoising Autoencoders}, where the network is trained to recover the original input 
+    This concept is also foundational to \textit{Denoising Autoencoders}, where the network is trained to recover the original input 
     from a corrupted version, forcing it to learn more robust latent representations.
 
     \item \textbf{Weight Noise}: This technique adds noise to the weights during the forward pass, 
@@ -109,6 +109,13 @@ This procedure can be summarized as follows:
 
 \paragraph{Multi-Task Learning}
 Multi-task learning is a regularization technique that involves training a model on multiple related tasks simultaneously.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/FFNN/regularization/multi-task-learning.tex}
+    \caption{Example of a multi-task learning architecture. 
+    The model is trained on multiple related tasks simultaneously, sharing some intermediate representations.}
+    \label{fig:multi-task-learning}
+\end{figure}
 
 Usually, we have several tasks that share the same set of input data $\boldsymbol{x}$, as well as some intermediate representations $h^{(shared)}$,
 but may have different output layers $f^{(1)}$, $f^{(2)}$, ..., $f^{(n)}$ for each task.
@@ -119,8 +126,37 @@ By sharing the intermediate representations, the model has 2 advantages:
     \item It can leverage the additional data from the other tasks, which can help to reduce overfitting and improve generalization performance.
 \end{itemize}
 
-\paragraph{Dropout}
+\paragraph{Parameter Sharing}
+Parameter tying is a regularization technique that involves sharing parameters across different parts of the model.
 
+In parameter tying, we can enforce certain parameters to be closer to each other, or even to be exactly the same. 
+This can be done by adding a penalty term to the loss function that encourages the parameters to be similar, or by explicitly tying the parameters together during the optimization process.
+
+In parameter sharing, we can enforce certain parameters to be exactly equal to each other.
+
+This technique can be particularly useful in cases where we have some prior knowledge about the structure of the data.
+In fact, it is at the base of \textit{Convolutional Neural Networks} (CNNs), where the same set of weights is shared across different spatial locations in the input image, 
+allowing the model to learn translation-invariant features.
+
+
+\paragraph{Dropout}
+We have already seen that the ensemble of multiple models can help to reduce overfitting by averaging out the errors of individual models.
+In deep learning, this approach would be computationally and time-consuming, as it would require training multiple models independently.
+
+\textit{Dropout} is a regularization technique born from the idea of ensemble learning, which allows to approximate the effect of training 
+multiple models by randomly dropping out a subset of the neurons during training.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/FFNN/regularization/dropout.tex}
+    \caption{Example of a dropout regularization technique.}
+    \label{fig:dropout}
+\end{figure}
+During the training process, each neuron is randomly dropped out (set to zero) with a certain probability $p$, which is a hyperparameter that controls the strength of the regularization.
+This forces the model to learn redundant representations, which allows the model to be more robust and less sensitive to the specific weights of individual neurons, 
+thus improving generalization performance.
+
+Dropout is similar to a \textit{bagging} approach, where we train multiple models on different subsets of the data and average their predictions.
+We can see each trainging iteration as training a different model. At test time, we use the full network, but we scale the weights of the neurons by the dropout probability $p$ to account for the fact that during training, each neuron was only active with probability $p$.
 \paragraph{Implicit Regularization}
 Some techinques, such as Stochastic Gradient Descent (SGD), have been shown to have an implicit regularization effect on the model.
 In particular, its stochastic nature can favor flatter minima of the loss function, which are associated with better generalization performance.
