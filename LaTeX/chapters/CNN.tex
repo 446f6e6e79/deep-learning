@@ -1,0 +1,89 @@
+\section{Convolutional Neural Network}
+Some real world application of AI, such as image recognition, naturally work with an input space that is locally structured.
+Convolutional Neural Networks (CNNs) are a type of neural network architecture that is particularly well-suited for processing data with a 2D structure, 
+such as images.
+
+Similarly to FFNNs, the idea for CNNs has some biological inspiration, as they are loosely based on the structure of the visual cortex in animals.
+Neurons are organized in a hierarchical manner, with each layer processing increasingly complex features of the input image, starting from simple edges and 
+textures in the early layers to more complex shapes and objects in the deeper layers.
+
+If we were to use a standard FFNN for processing images, we would need to flatten the 2D image into a 1D vector, which would result in a loss
+of spatial information and a large number of parameters to learn, making the model prone to overfitting.
+CNNs are designed on 2 principles that allow them to effectively process images while keeping the number of parameters manageable:
+\begin{itemize}
+    \item \textbf{Local Connectivity}: each neuron in a CNN is connected only to a small region of the layer before it;
+    \item \textbf{Parameter Sharing}: the same set of weights is shared across different spatial locations in the input image.
+    This allows the model to learn translation-invariant filters, while also significantly reducing the number of parameters to learn.
+\end{itemize}
+
+\subsection{Convolution}
+Convolutional Neural Networks basically replace general matrix multiplications with convolution operations in at least one layer of the network.
+
+\subsubsection*{1-D Convolution}
+Even though CNNs are typically used for processing 2D images, it's important to remember that the convolution operation can be applied to any type of data, including 1D sequences (e.g., time series, text)
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/CNN/1D-convolution.tex}
+    \caption{Example of a 1D convolution operation.}
+    \label{fig:1D-convolution}
+\end{figure}
+Given the example shown in the figure \ref{fig:1D-convolution}, we can express the convolution operation as follows:
+$$ c_1 = w_1 x_1 + w_2 x_2 + w_3 x_3 $$
+$$ c_2 = w_1 x_2 + w_2 x_3 + w_3 x_4 $$
+And so on, where $w_i$ are the weights of the filter and $x_i$ are the input values.
+
+\subsubsection*{2-D Convolution}
+In the case of 2D convolution, the input is a 2D image, and the convolution operation is performed by sliding a small filter (also called kernel) across the image and computing the dot product between the filter and the local region of the image.
+Formally, the output of a convolution operation for a given input image $I$ and filter $K$ is defined as:
+$$ (I * K)(x, y) = \sum_{i} \sum_{j} I(x+i, y+j) \cdot K(i, j) $$
+where $ * $ denotes the convolution operation.
+
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/CNN/2D-convolution.tex}
+    \caption{Example of a 2D convolution operation.}
+    \label{fig:2D-convolution}
+\end{figure}
+In the figure \ref{fig:2D-convolution}, we can see an example of a 2D convolution operation, where the input image is a $5 \times 5$ grid of pixel values, and the filter is a $3 \times 3$ kernel with specific values. 
+The output of the convolution operation is a new $3 \times 3$ grid of values, where each value is computed as the dot product between the kernel and the corresponding local region of the input image.
+
+\subsection{Inside a CNN}
+A CNN is typically composed of several stacked layers, each performing a specific operation on the input data. 
+Usually, low-level layers of the network learn to extract simple local features (e.g., edges, textures), while deeper layers learn to combine these features 
+into more complex and abstract representations (e.g., shapes, objects).
+
+Different types of layers can be used in a CNN, each one serving a specific purpose. In the following sections, we will briefly describe the most common types of layers used in CNNs.
+
+\subsubsection{Convolution Layer}
+The convolution layer is the core building block of a CNN, where the convolution operation is performed to extract features from the input data.
+Each layer consists of a set of filters (or kernels), covering a specific region of the input image, called the receptive field. 
+These filters are applied across the entire input image, through the process of convolution, to produce a feature map that highlights the presence 
+of specific features in the input image.
+
+Differently from what was happening with feature extraction, where filters were designed manually, 
+in CNNs the network learns the best filters for the task at hand through backpropagation and gradient descent, 
+allowing it to automatically discover relevant features from the data.
+
+It's important to note that the convolution layer has some hyperparameters that can be tuned to control the behavior of the convolution operation, such as:
+\begin{itemize}
+    \item \textbf{Kernel Size}: the size of the filter (e.g., $3 \times 3$, $5 \times 5$) that determines the size of the receptive field and the amount 
+    of local information captured by the convolution operation.
+    \item \textbf{Stride}: the step size with which the filter is moved across the input image. For example, a stride of 1 means that
+    the filter is applied at every possible position, while a stride of 2 means that the filter is applied at every other position, effectively downsampling the output feature map.
+    \item \textbf{Padding}: the output feature map produced by the convolution operation is smaller than the input image, due to the size of the kernel.
+    To preserve the spatial dimensions of the input image, we can add padding (e.g., zeros) around the borders of the input image before applying the convolution operation.
+\end{itemize}
+
+\subsubsection{Non-Linearity Layer}
+After the convolution layer, a non-linearity layer is typically applied to introduce non-linear transformations to the feature maps.
+This is usually done using activation functions such as ReLU (Rectified Linear Unit), similar to what we have seen in FFNNs.
+The non-linearity layer allows the network to learn more complex and non-linear relationships between the input data and the output.
+
+\subsubsection{Pooling Layer}
+The pooling layer is used to downsample the feature maps produced by the convolution layer, reducing their spatial 
+dimensions while retaining the most important information.
+
+This is typically done using operations such as max pooling or average pooling, which respectively take the maximum or average 
+value from a local region of the feature map, to produce a smaller output feature map.
+
+This also helps to create the translation invariance property of CNNs, as the exact position of the features in the input image becomes less important after pooling.
