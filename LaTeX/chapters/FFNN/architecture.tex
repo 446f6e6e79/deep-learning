@@ -1,0 +1,18 @@
+\subsection{Architectures}
+When designing a FFNN, we need to make several choices regarding the architecture of the network, such as:
+\begin{itemize}
+    \item \textbf{Number of Layers}: how deep should the network be?
+    \item \textbf{Number of Neurons per Layer}: how many neurons should each layer have?
+    \item \textbf{Expressiveness of the Network}: how complex should the network be to capture the underlying structure of the data?
+\end{itemize}
+We know that a 2-layer Neural network are universal function approximators, which means that they can approximate any continuous 
+function to an arbitrary degree of accuracy, given enough neurons in the hidden layer.
+This implies that we could use a shallow network with a single hidden layer, by increasing the number of neurons in that layer (wide network).
+
+However, in practice, it's not guaranteed that our training algorithm will find the optimal parameters that allow the network to approximate the target function, 
+as we have to take into consideration the problems in optimization and generalization.
+It has been shown that deeper networks can generally capture more complex functions and achieve better generalization performance than shallower networks.
+
+However, increasing the depth of the network is not always the best solution.
+Other approaches instead focused on architecutral design choices rather than depth. In particular, this idea was first explored in the context of Convolutional
+Neural Networks (CNNs), where the use of convolutional layers allows to get better performance with fewer parameters compared to FFNNs with fully connected layers.

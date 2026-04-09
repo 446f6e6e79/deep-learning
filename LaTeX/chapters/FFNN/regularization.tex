@@ -1,0 +1,128 @@
+\subsection{Regularization}
+Regularization is a set of techniques used to prevent overfitting in machine learning models, including FFNNs.
+
+\subsubsection{Model Capacity}
+Model capacity refers to the ability of a model to fit a wide variety of functions. We have that:
+\begin{itemize}
+    \item \textbf{Low capacity models} may underfit the data, as they are not able to capture the underlying structure of the data;
+    \item \textbf{High capacity models} may overfit the data, by memorizing properties of the training data that are not generalizable to unseen data.
+\end{itemize}
+We can control the capacity of a model by adjusting the hypotheses space, which is the set of all possible functions that
+the model can represent.
+
+To deal with overfitting, we need to find a good balance between the capacity of the model and its ability to generalize to unseen data.
+
+\subsubsection{Simple approach}
+In addition to controlling the model capacity, many techniques have been proposed to control overfitting, some of which where already known in the context of machine learning, such as:
+\begin{itemize}
+    \item \textbf{Collecting more data}: acquiring more training data can help to reduce overfitting, as it allows to better represent the underlying distribution of the data.
+    However, this is not always a valiable option, as it might be expensive to acquire more data;
+    \item \textbf{Ensemble methods}: combining the predictions of multiple models can help to reduce overfitting, as it allows to average out the errors of individual models;
+\end{itemize}
+
+\subsubsection{Regularization Methods}
+For deeper architectures, controlling the complexity of the model is not as simple as adjusting the number of parameters.
+Many techniques have been proposed to regularize such complex models, without reducing their capacity.
+Commonly, many regularization methods can be combined to achieve better performance, as they often have complementary effects on the model.
+
+In this section, we will discuss some of the most common regularization methods used in the context of FFNNs.
+
+\paragraph{Parameter Norm Penalties}
+One of the most common regularization techniques is to add a penalty term to the loss function that encourages the model to have smaller weights.
+The general formulation of this regularization technique can be expressed as follows:
+\begin{equation*}
+    \mathcal{L}_{\text{reg}}(\boldsymbol{\theta}) = \mathcal{L}(\boldsymbol{\theta}) + \lambda \Omega(\boldsymbol{\theta})
+\end{equation*}
+where $\mathcal{L}(\boldsymbol{\theta})$ is the original loss function, $\Omega(\boldsymbol{\theta})$ is the regularization term, and $\lambda$
+is a hyperparameter that controls the strength of the regularization.
+
+The most common choices for the regularization term $\Omega(\boldsymbol{\theta})$ are:
+\begin{itemize}
+    \item \textbf{L2 Regularization}: also known as Ridge Regression, it adds a penalty term that encourages the model to have smaller weights 
+    by adding the squared norm of the weights to the loss function. The regularization term can be expressed as follows:
+    \begin{equation*}
+        \Omega(\boldsymbol{\theta}) = \frac{1}{2} \sum_{i} ||\theta_i^2||
+    \end{equation*}
+    \item \textbf{L1 Regularization}: also known as Lasso Regression, it adds a penalty term proportional to the absolute value of the weights.
+    Differently from L2 regularization, L1 regularization favors the sparsity of the weights, setting the weights of less important features to zero. 
+    The regularization term can be expressed as follows:
+    \begin{equation*}
+        \Omega(\boldsymbol{\theta}) = \sum_{i} ||\theta_i||
+    \end{equation*}
+\end{itemize}
+\begin{comment}
+    #TODO: add visualiztion of l1 and l2
+\end{comment}
+
+\paragraph{Data Augmentation}
+Data augmentation is a technique that involves creating new synthetic training examples by applying transformations to the original training data.
+This is based on the idea that generated images help the model generalize better to diverse data by exposing it to a wider variety of examples during training.
+
+It is important to note that this method is primarily applicable to data types—such as images—where transformations can 
+be applied without changing the identity of the object (invariance). 
+For example, in image classification, we can apply transformations like rotation, scaling, and flipping, which do not change the image's class.
+
+However, these transformations must be chosen carefully based on the task. For example, in the MNIST digit classification task, we cannot apply a 180 degree rotation to 
+images of the classes "6" and "9," as it would change the class of the image.
+
+Furthermore, data augmentation does not always guarantee better performance. While it introduces new samples, 
+these examples may not add sufficient functional diversity to the training set since they are 
+merely variations of existing data rather than entirely new information.
+
+\paragraph{Noise Injection}
+Noise injection is a regularization technique that involves adding random small perturbations to different 
+levels of the network during training.
+\begin{itemize}
+    \item \textbf{Input Noise}: Adding Gaussian noise to each input example during training can achieve effects similar to $L_2$ regularization. 
+    Each example can be represented as:
+    \[ x'_i = x_i + \epsilon, \quad \epsilon \sim \mathcal{N}(0, \sigma^2) \]
+    where $\mathcal{N}(0, \sigma^2)$ is Gaussian noise with mean 0 and variance $\sigma^2$. 
+
+    For a linear layer, the noise variance is propagated through the weights. 
+    If $y = \sum w_i x_i$, the added variance at the node level is proportional to $\sum w_i^2 \sigma^2$. 
+    Consequently, to minimize the expected loss, the network is encouraged to maintain smaller weights, mimicking the effect of $L_2$ regularization. 
+    High levels of noise typically generate a smoother mapping function, improving generalization performance.
+
+    This concept is also foundational to \texttt{Denoising Autoencoders}, where the network is trained to recover the original input 
+    from a corrupted version, forcing it to learn more robust latent representations.
+
+    \item \textbf{Weight Noise}: This technique adds noise to the weights during the forward pass, 
+    forcing the model to remain performant even when parameters are slightly perturbed. 
+    This encourages the training process to converge to a \textit{flat minimum} of the loss function, 
+    where the model's performance is less sensitive to small changes in weight values.
+
+    \item \textbf{Output Noise}: This discourages the model from making overconfident predictions by smoothing out the label distribution (often referred to as label smoothing). 
+    This prevents the network from outputting extremely high logits for a single class, which can lead to better calibration and reduced overfitting.
+\end{itemize}
+
+\paragraph{Early Stopping}
+A simple yet effective regularization technique is to stop the training process before the model starts to overfit the training data.
+This can be done by monitoring the performance of the model on a validation set during training, and stopping the training process when the 
+performance on the validation set starts to degrade.
+
+This procedure can be summarized as follows:
+\begin{enumerate}
+    \item Start the training process with small weights;
+    \item Every time the error on the validation set decreases, save a copy of the model parameters;
+    \item When the training process is stopped, restore the model parameters to the values that achieved the best performance on the validation set.
+\end{enumerate}
+
+\paragraph{Multi-Task Learning}
+Multi-task learning is a regularization technique that involves training a model on multiple related tasks simultaneously.
+
+Usually, we have several tasks that share the same set of input data $\boldsymbol{x}$, as well as some intermediate representations $h^{(shared)}$,
+but may have different output layers $f^{(1)}$, $f^{(2)}$, ..., $f^{(n)}$ for each task.
+
+By sharing the intermediate representations, the model has 2 advantages:
+\begin{itemize}
+    \item It can learn more robust and generalizable features, as it is forced to learn representations that are useful for multiple tasks;
+    \item It can leverage the additional data from the other tasks, which can help to reduce overfitting and improve generalization performance.
+\end{itemize}
+
+\paragraph{Dropout}
+
+\paragraph{Implicit Regularization}
+Some techinques, such as Stochastic Gradient Descent (SGD), have been shown to have an implicit regularization effect on the model.
+In particular, its stochastic nature can favor flatter minima of the loss function, which are associated with better generalization performance.
+
+Also, using loss functions that are less sensitive to outliers, such as the Huber loss, can have an implicit regularization effect by reducing the influence of outliers on the training process.
