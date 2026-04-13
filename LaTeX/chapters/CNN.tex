@@ -87,3 +87,109 @@ This is typically done using operations such as max pooling or average pooling, 
 value from a local region of the feature map, to produce a smaller output feature map.
 
 This also helps to create the translation invariance property of CNNs, as the exact position of the features in the input image becomes less important after pooling.
+
+\subsection{Different Architectures}
+In this section, we will briefly describe some of the most popular CNN architectures that have been proposed in the literature, each one with its own unique design and characteristics.
+
+\subsubsection{LeNet (1998)}
+The LeNet architecture, proposed in 1998, is one of the earliest CNN architectures and was designed for handwritten digit recognition.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/CNN/LeNet.tex}
+    \caption{LeNet architecture.}
+    \label{fig:LeNet}
+\end{figure}
+It follows a simple architecture pattern, using 2 convolutional layers (C1 and C3), each followed by a pooling layer (S2 and S4).
+Finally, 2 fully connected layers (C5 and F6) are used to produce the final output, which is a probability distribution over the 10 possible digit classes (0-9).
+
+\subsubsection{AlexNet (2012)}
+Introduced for the 2012 ImageNet Large Scale Visual Recognition Challenge (ILSVRC), AlexNet significantly evolved the foundational 
+concepts of LeNet. 
+While it retained a similar structural logic, it scaled the complexity to 5 convolutional layers and 3 fully connected layers.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/CNN/AlexNet.tex}
+    \caption{AlexNet architecture.}
+    \label{fig:AlexNet}
+\end{figure}
+This architecture marked a turning point for deep learning. 
+By dramatically outperforming existing methods on ImageNet, AlexNet demonstrated the power of deep convolutional networks and
+guided the research community towards deeper and more complex architectures.
+
+Beyond its performance, AlexNet fundamentally changed how features were perceived. 
+Previously, image processing relied on hand-crafted descriptors like SIFT or GIST paired with classifiers such as SVMs. 
+AlexNet proved that an end-to-end trained CNN could automatically learn hierarchical features that were far more robust. 
+Researchers soon discovered that these learned representations were highly transferable, outperforming manual features in diverse applications—including object detection, 
+segmentation, and natural language processing.
+
+\subsubsection{Zeiler and Fergus (2013)}
+After the success of AlexNet, a natural question was: how can we understand what the network has learned?
+
+The Zeiler and Fergus architecture, proposed in 2013, introduced a method for visualizing and understanding the features learned by deep convolutional networks. 
+This approach involved deconvolutional networks, that allowed to invert the operations of a CNN, visualizing the activations of the different layers and understanding which features were being captured by the network.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/CNN/deconvolutionalNN.tex}
+    \caption{Zeiler and Fergus architecture for visualizing learned features.}
+    \label{fig:deconvolutionalNN}
+\end{figure}
+\paragraph{How it works}
+The deconvolutional network is designed to reverse the operations of a CNN, for each layer of the CNN. 
+It is built using the same types of layers as a CNN, but in reverse order, and with the operations inverted.
+Obviously, the convolution operation and the activation functions are easily inverted, but the pooling operation 
+is not invertible, as it removes information from the input feature map.
+
+To address this issue, the authors introduced a method called "unpooling", which is used to approximate the inverse of the pooling operation.
+It basically uses the indices of the maximum values from the pooling operation to place the values back in their original positions, while filling the rest of the positions with zeros.
+This allows the deconvolutional network to reconstruct an approximation of the original input image, based on the activations of the different layers of the CNN.
+
+\paragraph{Other approaches to explainability}
+Other approaches to explainability in CNNs include:
+\begin{itemize}
+    \item \textbf{Image Occlusion}: this method involves occluding different parts of the input image and observing how the output of the network changes, 
+    to understand which parts of the image are most important for the network's predictions;
+    \item \textbf{Class Model Visualization}: more rigorous than the previous one, this method involves finding the input image that maximizes the activation
+    of a specific class in the output layer, to understand which features are most important for that class;
+    \item \textbf{Class Activation Mapping (CAM)}: uses each weight of the output layer to create a saliency map that highlights the regions of the input image 
+    that are most important for the network's predictions. The images are then averaged to create a heatmap that shows the most important regions of the input image for the network's predictions.
+    
+    This approch only works for fully convolutional networks, with no fully connected layers.
+    \item \textbf{Grad-CAM}: An extension of CAM that can be applied to any CNN architecture. It uses the gradients of the output with respect to the feature maps of a specific convolutional 
+    layer to create a heatmap that highlights the important regions of the input image for the network's predictions.
+\end{itemize}
+
+\subsubsection{VGG Net(2014)}
+VGG Net, follow the same architecture pattern of AlexNet, but with a much deeper architecture, using up to 19 layers.
+Many configurations of VGG Net were proposed, with different numbers of convolutional layers and fully connected layers, but all of them were suffering from the same problem: 
+the number of parameters was becoming too large (particularly in the fully connected layers), making the network prone to overfitting and increasing the computational cost.
+
+Next architectures, proposed in the following years, used different architectural patterns to address this issue.
+
+\subsubsection{GoogLeNet}
+GoogLeNet was the first architecture to introduce the concept of "Inception Modules", which are designed to allow the network to learn multiple types of features at different scales, while keeping the number of parameters manageable.
+The network had no fully connected layers, significantly reducing the number of parameters and making it more efficient to train (from 60 million parameters in AlexNet to 4 million in GoogLeNet).
+It used a much deeper architecture, with 22 layers, and achieved state-of-the-art performance on the ImageNet dataset at the time of its introduction.
+
+To resolve the issue of vanishing gradients, given by the depth of the network, GoogLeNet also introduced some "auxiliary classifiers", which are additional output layers that are added at intermediate layers of the network. This allows
+to provide additional supervision to the network during training, helping to improve the flow of gradients.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{media/CNN/GoogLeNet.png}
+    \caption{GoogLeNet architecture.}
+    \hfill
+\end{figure}
+
+\paragraph{Inception Modules}
+The Inception Module is a building block of the GoogLeNet architecture, designed to allow the network to learn multiple types of features at different scales, while keeping the number of parameters manageable.
+The module consists of several parallel convolutional layers with different kernel sizes (e.g., $1$, $3$, $5$), as well as a pooling layer, that are applied to the same input feature map.
+The outputs of these layers are then concatenated together to produce the output feature map of the module.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{media/CNN/InceptionModule.png}
+    \caption{Inception Module.}
+\end{figure}
+
+\subsubsection{ResNet}
+ResNet, introduced in 2015, is a CNN architecture that introduced the concept of "residual connections", which are designed to allow the network to skip one or more layers during training,
+if they are not contributing to the learning process.ß
