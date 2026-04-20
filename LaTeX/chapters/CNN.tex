@@ -165,13 +165,22 @@ the number of parameters was becoming too large (particularly in the fully conne
 
 Next architectures, proposed in the following years, used different architectural patterns to address this issue.
 
-\subsubsection{GoogLeNet}
-GoogLeNet was the first architecture to introduce the concept of "Inception Modules", which are designed to allow the network to learn multiple types of features at different scales, while keeping the number of parameters manageable.
-The network had no fully connected layers, significantly reducing the number of parameters and making it more efficient to train (from 60 million parameters in AlexNet to 4 million in GoogLeNet).
-It used a much deeper architecture, with 22 layers, and achieved state-of-the-art performance on the ImageNet dataset at the time of its introduction.
+\subsubsection{GoogLeNet (2014)}
+GoogLeNet, introduced in 2014, introduced the \textbf{Inception Module}, a network component that allows to capture features at multiple scales and levels of abstraction,
+by applying multiple filter sizes in parallel within the same layer.
 
-To resolve the issue of vanishing gradients, given by the depth of the network, GoogLeNet also introduced some "auxiliary classifiers", which are additional output layers that are added at intermediate layers of the network. This allows
-to provide additional supervision to the network during training, helping to improve the flow of gradients.
+The key ideas introduced by GoogLeNet were:
+\begin{itemize}
+    \item \textbf{Parameter Efficiency:} By replacing computationally expensive fully connected layers with \textbf{Global Average Pooling}, 
+    GoogLeNet reduced the parameter count from approximately 60 million in AlexNet to just 6.7 million, despite being significantly deeper.
+    \item \textbf{Depth:} The network consists of 22 layers, making it substantially deeper than its predecessors. 
+    This depth allows it to learn more complex and abstract features from the input data, contributing to its improved performance on the ImageNet dataset.
+    \item \textbf{Dimensionality Reduction:} To keep the computational cost manageable, $1 \times 1$ convolutions are used to reduce the number of input channels 
+    before the expensive $3 \times 3$ and $5 \times 5$ convolutions.
+    \item \textbf{Intermediate Supervision:} To mitigate the \textbf{vanishing gradient problem} caused by the increased depth, GoogLeNet introduced auxiliary 
+    classifiers at intermediate layers. These branches provide additional gradient signals back to the earlier layers during training.
+\end{itemize}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{media/CNN/GoogLeNet.png}
@@ -180,9 +189,16 @@ to provide additional supervision to the network during training, helping to imp
 \end{figure}
 
 \paragraph{Inception Modules}
-The Inception Module is a building block of the GoogLeNet architecture, designed to allow the network to learn multiple types of features at different scales, while keeping the number of parameters manageable.
-The module consists of several parallel convolutional layers with different kernel sizes (e.g., $1$, $3$, $5$), as well as a pooling layer, that are applied to the same input feature map.
-The outputs of these layers are then concatenated together to produce the output feature map of the module.
+The Inception Module is a fundamental building block of the GoogLeNet architecture. 
+It is designed to allow the network to learn multiple types of features at different scales, while keeping the number of parameters manageable.
+Instead of choosing a single filter size, the module applies $1 \times 1$, $3 \times 3$, and $5 \times 5$ convolutions, along with a $3 \times 3$ max-pooling operation, in parallel.
+
+This approach offers two primary advantages:
+\begin{itemize}
+    \item \textbf{Multiscale Feature Extraction:} It allows the network to automatically decide which filter size is most relevant for a given feature, effectively handling objects of varying sizes within the ImageNet dataset.
+    \item \textbf{Feature Redundancy and Generalization:} Reusing the same input across parallel paths enforces a degree of redundancy in the learned feature maps. This redundancy encourages the model to learn more robust, scale-invariant representations, which significantly improves the generalization performance and provides a regularizing effect during training.
+\end{itemize}
+The outputs of all these operations are then concatenated together to produce the output feature map of the module.
 
 \begin{figure}[H]
     \centering
@@ -190,6 +206,45 @@ The outputs of these layers are then concatenated together to produce the output
     \caption{Inception Module.}
 \end{figure}
 
-\subsubsection{ResNet}
-ResNet, introduced in 2015, is a CNN architecture that introduced the concept of "residual connections", which are designed to allow the network to skip one or more layers during training,
-if they are not contributing to the learning process.ß
+\subsubsection{ResNet (2015)}
+As architectures grew increasingly deep, researchers encountered the \textbf{degradation problem}: as network depth increases, 
+accuracy begins to saturate and then degrades rapidly. 
+Crucially, this degradation is not caused by overfitting, as it is characterized by higher \textbf{training error} than their shallower counterparts.
+
+ResNet, introduced in 2015, addressed this issue by introducing the concept of \textbf{residual connections} (or skip connections), 
+which allows the network to learn to skip certain layers if they are not useful for the task at hand, 
+effectively allowing the network to learn an identity mapping (i.e., the input is passed through unchanged) if needed.
+
+It was shown that this simple architectural provided various benefits, such as:
+\begin{itemize}
+    \item \textbf{Implicit Ensemble Learning:} The skip connections allow the network to learn multiple paths for information flow, 
+    effectively creating an ensemble of shallower networks within the deeper architecture. 
+    \item \textbf{Smoother Loss Landscape:} The skip connections help to smooth the loss landscape, making it easier for 
+    the optimization algorithm to find a good solution and improving convergence during training.
+\end{itemize}
+
+\paragraph{Dimensions mismatch}
+It's important to note that not always the skip connections could be used, due to dimension mismatch between the input and output of the layers.
+To resolve this issue, the concept of $1 \times 1$ convolution was reused, allowing to match the dimensions of the input and output feature maps, 
+while also providing an additional level of feature transformation.
+
+\paragraph{Different residual blocks}: in the later years, different types of residual blocks were proposed.
+
+\subsubsection{DenseNet}
+
+\subsubsection{SENet}
+
+\subsubsection{ConvNext}
+
+\subsection{Regularization}
+To prevent overfitting, various regularization techniques were developed specifically for CNNs, such as:
+\begin{itemize}
+    \item \textbf{Cutout}: this method involves randomly masking out a square portion of the input image during training, replacing it with the mean pixel value of the dataset.
+    This approach forces the network to learn more robust features that are not reliant on specific parts of the image;
+    \item \textbf{DropBlock}: an extension of dropout, where instead of randomly dropping individual neurons, contiguous regions of the feature maps are dropped during training,
+    for all channels.
+    \item \textbf{CutMix}: this method involves randomly cutting and pasting patches between training images.
+    Class labels are also updated proportionally to the area of the patches. This encourages the model to learn features from different parts of the images,
+    providing a regularization effect and improving generalization.
+\end{itemize}
+
