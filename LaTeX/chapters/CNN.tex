@@ -228,13 +228,53 @@ It's important to note that not always the skip connections could be used, due t
 To resolve this issue, the concept of $1 \times 1$ convolution was reused, allowing to match the dimensions of the input and output feature maps, 
 while also providing an additional level of feature transformation.
 
-\paragraph{Different residual blocks}: in the later years, different types of residual blocks were proposed.
+\paragraph{Different residual blocks} 
+In the later years, different types of residual blocks were proposed. Instead of identity skip connections, some architectures used more 
+complex transformations in the skip connections, such as:
+\begin{itemize}
+    \item \textbf{Pre-activation Residual Block}: the order of batch normalization and activation functions is changed, to precede the
+    final convolution. This creates a cleaner identity mapping, as the skip connection is not affected by the non-linear transformations, 
+    and allows for better gradient flow during training;
+    \item \textbf{Bottleneck Residual Block}: this block uses a $1 \times 1$ convolution to reduce the number of channels before applying the expensive $3 \times 3$ convolution,
+    and then uses another $1 \times 1$ convolution to restore the original number of channels after the convolution operation.
+    \item \textbf{Wide Residual Block}: focuses on increasing the width of the network (i.e., the number of channels) instead of the depth, by applying wider convolutional 
+    layers and using fewer layers overall. This approach allowed to investigate the trade-off between depth and width in CNNs, to find the optimal trade-off for different tasks and datasets.
+\end{itemize}
+Following the success of ResNet, many architectures were proposed that built upon the idea of residual connections. 
+The next 2 architectures we will briefly describe are examples of this trend.
 
-\subsubsection{DenseNet}
+\subsubsection{DenseNet (2018)}
+DenseNet are a type of CNN architecture that builds upon the idea of residual connections. Instead of using skip connections that add the input to the output of a layer, 
+DenseNet introduces the \textbf{Dense Block}. 
 
-\subsubsection{SENet}
+In a Dense Block, each layer is connected to all the other layers that compose the block. This means that for each layer, the feature maps of
+all the previous layers are concatenated together and used as input for the current layer.
 
-\subsubsection{ConvNext}
+This approach has a few advantages, such as:
+\begin{itemize}
+    \item \textbf{Feature Reuse:} Since feature maps are preserved via concatenation, there is no need to relearn redundant features in subsequent layers.
+    \item \textbf{Parameter Efficiency:} Despite the dense connectivity, DenseNets often require fewer parameters than ResNets for similar performance because they do not need large, wide layers to capture complex information.
+\end{itemize}
+
+\subsubsection{SENet (2019)}
+SENet (Squeeze-and-Excitation Networks) is a type of CNN architecture that introduces the concept of \textbf{channel attention}. 
+Channel attention allows the network to learn to focus on the most important channels of the feature maps, by applying a weighting 
+mechanism to the channels based on their importance for the task at hand.
+
+The SE block learns to emphasize informative channels and suppress less useful ones, effectively allowing the network to adaptively recalibrate channel-wise feature responses.
+This is achieved through a two-step process:
+\begin{itemize}
+    \item \textbf{Squeeze}: Global average pooling is applied to the input feature, producing an average representation of each channel;
+    \item \textbf{Excitation}: Using a sigmoid activation function, the network learns to generate weights for each channel. 
+\end{itemize}
+The output of the SE block is obtained by multiplying the input feature maps by these learned weights, effectively emphasizing important channels and suppressing less useful ones.
+
+\subsubsection{ConvNext (2022)}
+In the later years, the trend of transformer-based architectures has dominated the field of computer vision, with models such as \textbf{Vision Transformer (ViT)} and \textbf{Swin Transformer} 
+achieving state-of-the-art performance on various vision tasks.
+
+ConvNext is a CNN architecture that was proposed in 2022. It showed that with some modifications to the standard CNN architecture, it is possible to achieve performance 
+comparable to transformer-based architectures, while still maintaining the efficiency and simplicity of CNNs.
 
 \subsection{Regularization}
 To prevent overfitting, various regularization techniques were developed specifically for CNNs, such as:
